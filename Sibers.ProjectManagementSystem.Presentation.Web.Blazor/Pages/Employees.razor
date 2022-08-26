@@ -5,7 +5,8 @@
 @inject IDialogService DialogService
 
 <PageTitle>Все сотрудники компании</PageTitle>
-<MudFab Style="position:fixed; bottom:10px; right:10px;" Color="Color.Success" StartIcon="@Icons.Material.Filled.Add" />
+<MudFab Style="position:fixed; bottom:10px; right:10px;" Color="Color.Success"
+    StartIcon="@Icons.Material.Filled.Add" @onclick="OnEmployeeCreate"/>
 <MudText Typo="Typo.h3" GutterBottom="true">Все сотрудники компании</MudText>
 
 @if (_employeesList == null)
@@ -96,6 +97,18 @@ else
                 FullWidth = true
             };
         var dialog = DialogService.Show<WatchEmployeeDialog>("Просмотр сотрудника", options);
+    }
+
+    private void OnEmployeeCreate()
+    {
+        DialogOptions options = new DialogOptions
+            {
+                CloseButton = true,
+                CloseOnEscapeKey = true,
+                MaxWidth = MaxWidth.Medium,
+                FullWidth = true
+            };
+        var dialog = DialogService.Show<CreateEmployeeDialog>("Создание сотрудника", options);
     }
 
     private async Task OnEmployeeDelete(int employeeId)

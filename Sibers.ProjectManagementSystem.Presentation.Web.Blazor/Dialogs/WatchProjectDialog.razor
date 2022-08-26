@@ -1,0 +1,79 @@
+﻿@using Sibers.ProjectManagementSystem.Data.Entities
+<MudDialog DisableSidePadding="true">
+    <DialogContent>
+        <MudContainer Style="max-height: 700px; overflow-y: scroll">
+            @if (project == null)
+            {
+                <MudProgressCircular Indeterminate="true"></MudProgressCircular>
+            }
+            else
+            {
+                
+            }
+        </MudContainer>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Color="Color.Primary" OnClick="Ok">Accept</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private MudDialogInstance MudDialog { get; set; }
+
+    private IEnumerable<Employee> _employees;
+    private Employee _manager = new Employee()
+        {
+            FirstName = "Иванов",
+            LastName = "Иван",
+            Patronymic = "Петрович"
+        };
+    private string _managerFullName;
+
+    private Project project = new Project
+        {
+            Id = 10,
+            Name = "Test task",
+            NameOfContractorCompany = "Microsoft",
+            NameOfCustomerCompany = "Oracle",
+            Priority = 1000,
+            StartDate = new DateTime(2022, 1, 1),
+            EndDate = new DateTime(2022, 12, 31),
+        };
+
+    private bool _loading = false;
+    private DateTime? _projectStartDate;
+    private DateTime? _projectEndDate;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _managerFullName = $"{_manager.FirstName} {_manager.LastName} {_manager.Patronymic}";
+        await GetEmployees();
+    }
+
+    void Ok() => MudDialog.Close(DialogResult.Ok(true));
+    void Cancel() => MudDialog.Cancel();
+
+    private Task GetEmployees()
+    {
+        return Task.Factory.StartNew(() =>
+        {
+            int employeesCount = 33;
+            int id;
+            Employee[] employees = new Employee[employeesCount];
+            for (int i = 0; i < employeesCount; i++)
+            {
+                id = i + 1;
+                employees[i] = new Employee
+                {
+                    Id = id,
+                    FirstName = $"EmployeeFirstName_{id}",
+                    LastName = $"EmployeeLastName_{id}",
+                    Patronymic = $"EmployeePatronymic_{id}",
+                    Email = $"employee_{id}_@gmail.com"
+                };
+            }
+            _employees = employees;
+        });
+    }
+}

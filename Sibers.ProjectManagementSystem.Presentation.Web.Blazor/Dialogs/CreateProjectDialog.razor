@@ -12,13 +12,13 @@
                     <MudText GutterBottom="true" Typo="Typo.h5">Общая информация</MudText>
                         <MudTextField Class="mb-3" Label="Id" @bind-Value="project.Id" Required="true" 
                             RequiredError="Это обязательное поле!"/>
-                        <MudTextField Class="mb-3" Label="Name" @bind-Value="project.Name" Required="true" 
+                        <MudTextField Class="mb-3" Label="Название" @bind-Value="project.Name" Required="true" 
                             RequiredError="Это обязательное поле!"/>
-                        <MudTextField Class="mb-3" Label="NameOfCustomerCompany" @bind-Value="project.NameOfCustomerCompany" Required="true" 
+                        <MudTextField Class="mb-3" Label="Название компании-заказчика" @bind-Value="project.NameOfCustomerCompany" Required="true" 
                             RequiredError="Это обязательное поле!"/>
-                        <MudTextField Class="mb-3" Label="NameOfContractorCompany" @bind-Value="project.NameOfContractorCompany" Required="true" 
+                        <MudTextField Class="mb-3" Label="Название компании-исполнителя" @bind-Value="project.NameOfContractorCompany" Required="true" 
                             RequiredError="Это обязательное поле!"/>
-                        <MudNumericField Class="mb-3" Label="Priority" @bind-Value="project.Priority" Required="true" 
+                        <MudNumericField Class="mb-3" Label="Приоритет" @bind-Value="project.Priority" Required="true" 
                             RequiredError="Это обязательное поле!"/>
                         <MudGrid Class="mb-3">
                             <MudItem xs="6">
@@ -43,15 +43,12 @@
                                 Руководитель
                             </MudText>
                             <MudGrid Class="mb-3">
-                                <MudItem xs="8">
+                                <MudItem xs="9">
                                     <MudTextField @bind-Value="_managerFullName" Label="ФИО руководителя" ReadOnly="true" Variant="Variant.Text" />
                                 </MudItem>
-                                <MudItem xs="4">
-                                    <MudButton Color="Color.Info" Variant="Variant.Filled">
-                                        Изменить
-                                    </MudButton>
-                                    <MudButton Color="Color.Error" Variant="Variant.Filled">
-                                        Снять с должности
+                                <MudItem xs="3">
+                                    <MudButton Color="Color.Primary" Variant="Variant.Filled">
+                                        Назначить
                                     </MudButton>
                                 </MudItem>
                             </MudGrid>
@@ -113,7 +110,7 @@
     </DialogContent>
     <DialogActions>
         <MudButton OnClick="Cancel">Отмена</MudButton>
-        <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="Submit">Принять</MudButton>
+        <MudButton Color="Color.Success" Variant="Variant.Filled" OnClick="Submit">Создать</MudButton>
     </DialogActions>
 </MudDialog>
 
