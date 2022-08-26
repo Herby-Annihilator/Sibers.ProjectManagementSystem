@@ -1,0 +1,181 @@
+﻿@using Sibers.ProjectManagementSystem.Data.Entities
+<MudDialog>
+    <DialogContent>
+        <MudContainer Style="max-height: 700px; overflow-y: scroll; width:max-content;">
+            @if (_loading)
+            {
+                <MudProgressCircular Indeterminate="true"></MudProgressCircular>
+            }
+            else
+            {
+                <EditForm Model="@project">
+                        <MudTextField Class="mb-3" Label="Id" @bind-Value="project.Id" Required="true" 
+                            RequiredError="Это обязательное поле!"/>
+                        <MudTextField Class="mb-3" Label="Name" @bind-Value="project.Name" Required="true" 
+                            RequiredError="Это обязательное поле!"/>
+                        <MudTextField Class="mb-3" Label="NameOfCustomerCompany" @bind-Value="project.NameOfCustomerCompany" Required="true" 
+                            RequiredError="Это обязательное поле!"/>
+                        <MudTextField Class="mb-3" Label="NameOfContractorCompany" @bind-Value="project.NameOfContractorCompany" Required="true" 
+                            RequiredError="Это обязательное поле!"/>
+                        <MudNumericField Class="mb-3" Label="Priority" @bind-Value="project.Priority" Required="true" 
+                            RequiredError="Это обязательное поле!"/>
+                        <MudGrid Class="mb-3">
+                            <MudItem xs="6">
+                                <MudDatePicker Class="mud-width-full" Label="Дата начала проекта" Editable="true" @bind-Date="_projectStartDate" 
+                                    Mask="@(new DateMask("dd.MM.yyyy"))" DateFormat="dd.MM.yyyy" Placeholder="Дата" 
+                                    Required="true" RequiredError="Это обязательное поле!"/>
+                            </MudItem>
+                            <MudItem xs="6">
+                                <MudDatePicker Class="mud-width-full" Label="Дата окончания проекта" Editable="true" @bind-Date="_projectEndDate" 
+                                    Mask="@(new DateMask("dd.MM.yyyy"))" DateFormat="dd.MM.yyyy" Placeholder="Дата" 
+                                    Required="true" RequiredError="Это обязательное поле!"/>
+                            </MudItem>
+                        </MudGrid>
+                        
+                        @if (_employees == null)
+                        {
+                            <MudProgressCircular Indeterminate="true"></MudProgressCircular>
+                        }
+                        else
+                        {
+                            <MudText Typo="Typo.h5" GutterBottom="true">
+                                Руководитель
+                            </MudText>
+                            <MudGrid Class="mb-3">
+                                <MudItem xs="8">
+                                    <MudTextField @bind-Value="_managerFullName" Label="ФИО руководителя" ReadOnly="true" Variant="Variant.Text" />
+                                </MudItem>
+                                <MudItem xs="4">
+                                    <MudButton Color="Color.Info" Variant="Variant.Filled">
+                                        Изменить
+                                    </MudButton>
+                                    <MudButton Color="Color.Error" Variant="Variant.Filled">
+                                        Снять с должности
+                                    </MudButton>
+                                </MudItem>
+                            </MudGrid>
+                            <MudText Typo="Typo.h6" GutterBottom="true">Сотрудники на проекте</MudText>
+                            <MudButton Variant="Variant.Filled" Color="Color.Success" Class="mb-3">
+                                Добавить сотрудника
+                            </MudButton>
+                            <MudTable Items="_employees" FixedHeader="true" FixedFooter="true" Hover="true" SortLabel="Sort by">
+                                <HeaderContent>
+                                    <MudTh>
+                                        <MudTableSortLabel SortBy="new Func<Employee, object>(e => e.Id)">
+                                            Id
+                                        </MudTableSortLabel>
+                                    </MudTh>
+                                    <MudTh>
+                                        <MudTableSortLabel SortBy="new Func<Employee, object>(e => e.FirstName)">
+                                            Фамилия
+                                        </MudTableSortLabel>
+                                    </MudTh>
+                                    <MudTh>
+                                        <MudTableSortLabel SortBy="new Func<Employee, object>(e => e.LastName)">
+                                            Имя
+                                        </MudTableSortLabel>
+                                    </MudTh>
+                                    <MudTh>
+                                        <MudTableSortLabel SortBy="new Func<Employee, object>(e => e.Patronymic)">
+                                            Отчество
+                                        </MudTableSortLabel>
+                                    </MudTh>
+                                    <MudTh>
+                                        <MudTableSortLabel SortBy="new Func<Employee, object>(e => e.Email)">
+                                            Email
+                                        </MudTableSortLabel>
+                                    </MudTh>
+                                    <MudTh>
+                                        Действие
+                                    </MudTh>
+                                </HeaderContent>
+                                <RowTemplate Context="emp">
+                                    <MudTd DataLabel="Id">@emp.Id</MudTd>
+                                    <MudTd DataLabel="FirstName">@emp.FirstName</MudTd>
+                                    <MudTd DataLabel="LastName">@emp.LastName</MudTd>
+                                    <MudTd DataLabel="Patronymic">@emp.Patronymic</MudTd>
+                                    <MudTd DataLabel="Email">@emp.Email</MudTd>
+                                    <MudTd>
+                                        <MudButton Color="Color.Error" Variant="Variant.Filled">
+                                            Снять с проекта
+                                        </MudButton>                                       
+                                    </MudTd>
+                                </RowTemplate>
+                                <PagerContent>
+                                    <MudTablePager PageSizeOptions="new int[] { 10, 25, 50, 100 }"/>
+                                </PagerContent>
+                            </MudTable>
+                        }
+                    </EditForm>
+            }
+        </MudContainer>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Отмена</MudButton>
+        <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="Submit">Принять</MudButton>
+    </DialogActions>
+</MudDialog>
+
+
+@code {
+
+
+    [CascadingParameter] 
+    MudDialogInstance MudDialog { get; set; }
+
+    private IEnumerable<Employee> _employees;
+    private Employee _manager = new Employee()
+        {
+            FirstName = "Иванов",
+            LastName = "Иван",
+            Patronymic = "Петрович"
+        };
+    private string _managerFullName;
+
+    private Project project = new Project
+        {
+            Id = 10,
+            Name = "Test task",
+            NameOfContractorCompany = "Microsoft",
+            NameOfCustomerCompany = "Oracle",
+            Priority = 1000,
+            StartDate = new DateTime(2022, 1, 1),
+            EndDate = new DateTime(2022, 12, 31),
+        };
+
+    private bool _loading = false;
+    private DateTime? _projectStartDate;
+    private DateTime? _projectEndDate;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _managerFullName = $"{_manager.FirstName} {_manager.LastName} {_manager.Patronymic}";
+        await GetEmployees();
+    }
+
+    void Submit() => MudDialog.Close(DialogResult.Ok(true));
+    void Cancel() => MudDialog.Cancel();
+
+    private Task GetEmployees()
+    {
+        return Task.Factory.StartNew(() =>
+        {
+            int employeesCount = 33;
+            int id;
+            Employee[] employees = new Employee[employeesCount];
+            for (int i = 0; i < employeesCount; i++)
+            {
+                id = i + 1;
+                employees[i] = new Employee
+                {
+                    Id = id,
+                    FirstName = $"EmployeeFirstName_{id}",
+                    LastName = $"EmployeeLastName_{id}",
+                    Patronymic = $"EmployeePatronymic_{id}",
+                    Email = $"employee_{id}_@gmail.com"
+                };
+            }
+            _employees = employees;
+        });
+    }
+}

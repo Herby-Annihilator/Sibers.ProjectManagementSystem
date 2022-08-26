@@ -1,0 +1,133 @@
+﻿@page "/employees"
+@using Sibers.ProjectManagementSystem.Data.Entities
+@using Sibers.ProjectManagementSystem.Presentation.Web.Blazor.Dialogs
+
+@inject IDialogService DialogService
+
+<PageTitle>Все сотрудники компании</PageTitle>
+<MudFab Style="position:fixed; bottom:10px; right:10px;" Color="Color.Success" StartIcon="@Icons.Material.Filled.Add" />
+<MudText Typo="Typo.h3" GutterBottom="true">Все сотрудники компании</MudText>
+
+@if (_employeesList == null)
+{
+    <MudProgressCircular Color="Color.Default" Indeterminate="true" />
+}
+else
+{
+    <MudTable Style="height:stretch;" Items="_employeesList" FixedHeader="true" FixedFooter="true" Hover="true" SortLabel="Sort by">
+    <HeaderContent>
+        <MudTh>
+            <MudTableSortLabel SortBy="new Func<Employee, object>(e => e.Id)">
+                Id
+            </MudTableSortLabel>
+        </MudTh>
+        <MudTh>
+            <MudTableSortLabel SortBy="new Func<Employee, object>(e => e.FirstName)">
+                Фамилия
+            </MudTableSortLabel>
+        </MudTh>
+        <MudTh>
+            <MudTableSortLabel SortBy="new Func<Employee, object>(e => e.LastName)">
+                Имя
+            </MudTableSortLabel>
+        </MudTh>
+        <MudTh>
+            <MudTableSortLabel SortBy="new Func<Employee, object>(e => e.Patronymic)">
+                Отчество
+            </MudTableSortLabel>
+        </MudTh>
+        <MudTh>
+            <MudTableSortLabel SortBy="new Func<Employee, object>(e => e.Email)">
+                Email
+            </MudTableSortLabel>
+        </MudTh>
+        <MudTh>
+            Действие
+        </MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="Id">@context.Id</MudTd>
+        <MudTd DataLabel="FirstName">@context.FirstName</MudTd>
+        <MudTd DataLabel="LastName">@context.LastName</MudTd>
+        <MudTd DataLabel="Patronymic">@context.Patronymic</MudTd>
+        <MudTd DataLabel="Email">@context.Email</MudTd>
+        <MudTd>
+            <MudIconButton Color="Color.Info" Variant="Variant.Filled" Icon="@Icons.Filled.RemoveRedEye" @onclick="OnEmployeeWatch">
+            </MudIconButton>
+            <MudIconButton Color="Color.Success" Variant="Variant.Filled" Icon="@Icons.Filled.Edit" @onclick="OnEmployeeEdit">
+            </MudIconButton>
+            <MudIconButton Color="Color.Error" Variant="Variant.Filled" Icon="@Icons.Filled.Delete" @onclick="@(() => OnEmployeeDelete(context.Id))">
+            </MudIconButton>
+        </MudTd>
+    </RowTemplate>
+    <PagerContent>
+        <MudTablePager PageSizeOptions="new int[] { 10, 25, 50, 100 }"/>
+    </PagerContent>
+</MudTable>
+}
+
+@code {
+    private IEnumerable<Employee> _employeesList;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetEmployees();
+    }
+
+    private void OnEmployeeEdit()
+    {
+        DialogOptions options = new DialogOptions
+            {
+                CloseButton = true,
+                CloseOnEscapeKey = true,
+                MaxWidth = MaxWidth.Medium,
+                FullWidth = true
+            };
+        var dialog = DialogService.Show<EmployeeManagementDialog>("Управление сотрудником", options);
+    }
+
+    private void OnEmployeeWatch()
+    {
+        DialogOptions options = new DialogOptions
+            {
+                CloseButton = true,
+                CloseOnEscapeKey = true,
+                MaxWidth = MaxWidth.Medium,
+                FullWidth = true
+            };
+        var dialog = DialogService.Show<WatchEmployeeDialog>("Просмотр сотрудника", options);
+    }
+
+    private async Task OnEmployeeDelete(int employeeId)
+    {
+        bool? result = await DialogService.ShowMessageBox(
+            title: $"Удаление сотрудника {employeeId}",
+            markupMessage: new MarkupString("Вы действительно хотите удалить сотрудника? Действие невозможно будет отменить"),
+            yesText: "Удалить",
+            cancelText: "Отмена"
+        );
+    }
+
+    private Task GetEmployees()
+    {
+        return Task.Factory.StartNew(() =>
+        {
+            int employeesCount = 33;
+            int id;
+            Employee[] employees = new Employee[employeesCount];
+            for (int i = 0; i < employeesCount; i++)
+            {
+                id = i + 1;
+                employees[i] = new Employee
+                {
+                    Id = id,
+                    FirstName = $"EmployeeFirstName_{id}",
+                    LastName = $"EmployeeLastName_{id}",
+                    Patronymic = $"EmployeePatronymic_{id}",
+                    Email = $"employee_{id}_@gmail.com"
+                };
+            }
+            _employeesList = employees;
+        });
+    }
+}

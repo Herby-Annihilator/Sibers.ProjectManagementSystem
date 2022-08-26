@@ -1,0 +1,104 @@
+﻿@using Sibers.ProjectManagementSystem.Data.Entities
+<MudDialog>
+    <DialogContent>
+        <MudContainer>
+            @if (_employee == null)
+            {
+                <MudProgressCircular Indeterminate="true"></MudProgressCircular>
+            }
+            else
+            {
+               <MudText GutterBottom="true" Typo="Typo.h6">
+                   Фамилия Имя Отчество
+               </MudText>
+                <MudText GutterBottom="true" Typo="Typo.h4">
+                    @_employeeFullName
+                </MudText>
+                <MudText GutterBottom="true" Typo="Typo.h6">
+                   Email
+               </MudText>
+                <MudText GutterBottom="true" Typo="Typo.h4">
+                    @_employee.Email
+                </MudText>
+                <MudText Typo="Typo.h5" GutterBottom="true" Class="mt-5">
+                    Задействован на проектах
+                </MudText>
+                @if (_employee.EmployeesInProject == null)
+                {
+                    <MudProgressCircular Indeterminate="true"></MudProgressCircular>
+                }
+                else
+                {
+                    <MudTable Items="_employee.EmployeesInProject" Hover="true">
+                        <HeaderContent>
+                            <MudTh>
+                                Название проекта
+                            </MudTh>
+                            <MudTh>
+                                Роль на проекте
+                            </MudTh>
+                        </HeaderContent>
+                        <RowTemplate Context="ep">
+                            <MudTd DataLabel="Название проекта">@ep.Project.Name</MudTd>
+                            <MudTd DataLabel="Роль на проекте">@ep.RoleInProject.Name</MudTd>
+                        </RowTemplate>
+                        <PagerContent>
+                            <MudTablePager PageSizeOptions="new int[] { 5, 10, 15}"/>
+                        </PagerContent>
+                    </MudTable>
+                }
+            }
+        </MudContainer>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Назад</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    MudDialogInstance MudDialog { get; set; }
+
+    protected override Task OnInitializedAsync()
+    {
+        _employeeFullName = $"{_employee.FirstName} {_employee.LastName} {_employee.Patronymic}";
+        return base.OnInitializedAsync();
+    }
+
+    private string _employeeFullName;
+    private Employee _employee = new Employee
+        {
+            FirstName = "Иванов",
+            LastName = "Петр",
+            Patronymic = "Сидорович",
+            Email = "ivanov_ps@mail.ru",
+            Id = 15,
+            EmployeesInProject = new List<EmployeeInProject>()
+            {
+                new EmployeeInProject()
+                {
+                    Project = new Project
+                    {
+                        Name = "Какой-то проект"
+                    },
+                    RoleInProject = new RoleInProject
+                    {
+                        Name = "Руководитель"
+                    }
+                },
+                new EmployeeInProject()
+                {
+                    Project = new Project
+                    {
+                        Name = "Другой проект"
+                    },
+                    RoleInProject = new RoleInProject
+                    {
+                        Name = "Сотрудник"
+                    }
+                }
+            },
+        };
+
+    private void Cancel() => MudDialog.Cancel();
+}

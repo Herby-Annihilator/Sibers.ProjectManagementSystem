@@ -1,0 +1,117 @@
+﻿@page "/projects"
+@using Sibers.ProjectManagementSystem.Data.Entities
+@using Sibers.ProjectManagementSystem.Presentation.Web.Blazor.Dialogs
+
+@inject IDialogService DialogService
+
+@if (_projects == null)
+{
+    <MudProgressCircular Color="Color.Default" Indeterminate="true" />
+}
+else
+{
+    <MudFab Style="position:fixed; bottom:10px; right:10px;" Color="Color.Success" StartIcon="@Icons.Material.Filled.Add" />
+    <MudText Typo="Typo.h3" GutterBottom="true">Проекты</MudText>
+    @if (_projects.Count() == 0)
+    {
+        <MudText Typo="Typo.h5" GutterBottom="true">Здесь нихуя нету</MudText>
+    }
+    else
+    {
+        <MudGrid Justify="Justify.Center" Spacing="6">
+            @foreach (var item in _projects)
+            {
+                <MudItem xs="4" Class="d-flex align-items-stretch">
+                    <MudCard Class="mud-width-full">
+                        <MudCardHeader>
+                            <CardHeaderContent>
+                                <MudText Typo="Typo.h6">@item.Name</MudText>
+                            </CardHeaderContent>
+                        </MudCardHeader>
+                        <MudCardContent>
+                            <MudText>@item.NameOfCustomerCompany просит помочь @item.NameOfContractorCompany</MudText>
+                            <MudText Typo="Typo.body2">The quick, brown fox jumps over a lazy dog.</MudText>
+                        </MudCardContent>
+                        <MudCardActions>
+                            <MudButton Variant="Variant.Outlined" Color="Color.Info">Подробнее</MudButton>
+                            <MudButton Class="ms-3" Variant="Variant.Outlined" Color="Color.Primary" @onclick="OpenDialog">
+                                Управление
+                            </MudButton>
+                            <MudButton @onclick="@(() => OnProjectDeleting(item.Id))" Variant="Variant.Outlined" Color="Color.Error" Class="ms-3">
+                                Удалить
+                            </MudButton>
+                        </MudCardActions>
+                    </MudCard>
+                </MudItem>
+            }
+        </MudGrid>
+    }   
+}
+
+
+@code {
+
+    private async void OnProjectDeleting(int projectId)
+    {
+        bool? result = await DialogService.ShowMessageBox(
+            title: $"Удаление проекта {projectId}",
+            markupMessage: new MarkupString("Вы действительно хотите удалить проект? Действие невозможно будет отменить"),
+            yesText: "Удалить",
+            cancelText: "Отмена"
+        );
+    }
+
+    private IEnumerable<Project> _projects;
+
+    protected void OpenDialog()
+    {
+        var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Large, FullWidth = true };
+        var dialog = DialogService.Show<ProjectManagementDialog>("Управление проектом", options);
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await FillProjects();
+    }
+
+    private Task FillProjects()
+    {
+        return Task.Factory.StartNew(() =>
+        {
+            Project[] projects = new Project[]
+                {
+                    new Project
+                        {
+                            Id = 1,
+                            Name = "Test",
+                            NameOfCustomerCompany = "Sibers",
+                            NameOfContractorCompany = "RukinStudio",
+                            Priority = 10,
+                            StartDate = new DateTime(2022, 8, 22),
+                            EndDate = new DateTime(2022, 8, 29)
+                        },
+                        new Project
+                        {
+                            Id = 2,
+                            Name = "FirstProject",
+                            NameOfCustomerCompany = "Some customer company",
+                            NameOfContractorCompany = "Microsoft",
+                            Priority = 5,
+                            StartDate = new DateTime(2021, 8, 22),
+                            EndDate = new DateTime(2022, 8, 29)
+                        },
+                        new Project
+                        {
+                            Id = 3,
+                            Name = "Second",
+                            NameOfCustomerCompany = "Microsoft",
+                            NameOfContractorCompany = "Sibers",
+                            Priority = 7,
+                            StartDate = new DateTime(2022, 1, 22),
+                            EndDate = new DateTime(2022, 12, 29)
+                        }
+                };
+            _projects = projects;
+        });
+    }
+}
