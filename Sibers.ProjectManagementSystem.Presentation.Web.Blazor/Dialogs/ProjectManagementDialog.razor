@@ -1,4 +1,5 @@
 ﻿@using Sibers.ProjectManagementSystem.Data.Entities
+@inject IDialogService DialogService
 <MudDialog>
     <DialogContent>
         <MudContainer Style="max-height: 700px; overflow-y: scroll; width:max-content;">
@@ -50,13 +51,10 @@
                                     <MudButton Color="Color.Info" Variant="Variant.Filled">
                                         Изменить
                                     </MudButton>
-                                    <MudButton Color="Color.Error" Variant="Variant.Filled">
-                                        Снять с должности
-                                    </MudButton>
                                 </MudItem>
                             </MudGrid>
                             <MudText Typo="Typo.h6" GutterBottom="true">Сотрудники на проекте</MudText>
-                            <MudButton Variant="Variant.Filled" Color="Color.Success" Class="mb-3">
+                            <MudButton Variant="Variant.Filled" Color="Color.Success" Class="mb-3" @onclick="OnEmplyeeSelecting">
                                 Добавить сотрудника
                             </MudButton>
                             <MudTable Items="_employees" FixedHeader="true" FixedFooter="true" Hover="true" SortLabel="Sort by">
@@ -97,7 +95,7 @@
                                     <MudTd DataLabel="Patronymic">@emp.Patronymic</MudTd>
                                     <MudTd DataLabel="Email">@emp.Email</MudTd>
                                     <MudTd>
-                                        <MudButton Color="Color.Error" Variant="Variant.Filled">
+                                        <MudButton Color="Color.Error" Variant="Variant.Filled" @onclick="(() => OnEmployeeRemovingFromProject(emp.Id))">
                                             Снять с проекта
                                         </MudButton>                                       
                                     </MudTd>
@@ -152,6 +150,28 @@
     {
         _managerFullName = $"{_manager.FirstName} {_manager.LastName} {_manager.Patronymic}";
         await GetEmployees();
+    }
+
+    private async Task OnEmployeeRemovingFromProject(int employeeId)
+    {
+        bool? result = await DialogService.ShowMessageBox(
+            title: $"Удаление сотрудника {employeeId}",
+            markupMessage: new MarkupString("Вы действительно хотите снять сотрудника? Действие невозможно будет отменить"),
+            yesText: "Снять",
+            cancelText: "Отмена"
+        );
+    }
+
+    private void OnEmplyeeSelecting()
+    {
+         DialogOptions options = new DialogOptions
+            {
+                CloseButton = true,
+                CloseOnEscapeKey = true,
+                MaxWidth = MaxWidth.Large,
+                FullWidth = true
+            };
+        var dialog = DialogService.Show<SelectEmployeeDialog>("Выбор сотрудников", options);
     }
 
     void Submit() => MudDialog.Close(DialogResult.Ok(true));

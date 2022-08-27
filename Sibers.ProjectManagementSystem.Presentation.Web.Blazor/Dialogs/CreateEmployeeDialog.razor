@@ -23,7 +23,7 @@
                         <MudText Typo="Typo.h5" GutterBottom="true" Class="mt-5">
                                 Задействован на проектах
                         </MudText>
-                        <MudButton Variant="Variant.Filled" Color="Color.Success" Class="mt-3 mb-3">
+                        <MudButton Variant="Variant.Filled" Color="Color.Success" Class="mt-3 mb-3" @onclick="OnProjectSelecting">
                             Добавить на проект
                         </MudButton>
                         @if (_employee.EmployeesInProject == null)
@@ -48,7 +48,7 @@
                                     <MudTd DataLabel="Название проекта">@ep.Project.Name</MudTd>
                                     <MudTd DataLabel="Роль на проекте">@ep.RoleInProject.Name</MudTd>
                                     <MudTd DataLabel="Действие">
-                                        <MudButton Color="Color.Tertiary" Variant="Variant.Filled">
+                                        <MudButton Color="Color.Tertiary" Variant="Variant.Filled" @onclick="OnChangeEmployeesRole">
                                             Изменить роль
                                         </MudButton>
                                         <MudButton Color="Color.Error" Variant="Variant.Filled" @onclick="@(() => OnEmployeeDeleting(@_employee.Id))">
@@ -76,6 +76,30 @@
     MudDialogInstance MudDialog { get; set; }
 
     private bool Loading { get; set; }
+
+    private void OnChangeEmployeesRole()
+    {
+         DialogOptions options = new DialogOptions
+            {
+                CloseButton = true,
+                CloseOnEscapeKey = true,
+                MaxWidth = MaxWidth.Medium,
+                FullWidth = true
+            };
+        var dialog = DialogService.Show<ChangeEmployeesRoleDialog>("Изменение роли сотрудника", options);
+    }
+
+    private void OnProjectSelecting()
+    {
+         DialogOptions options = new DialogOptions
+            {
+                CloseButton = true,
+                CloseOnEscapeKey = true,
+                MaxWidth = MaxWidth.Large,
+                FullWidth = true
+            };
+        var dialog = DialogService.Show<SelectProjectDialog>("Выбор проектов для сотрудника", options);
+    }
 
     private async Task OnEmployeeDeleting(int employeeId)
     {

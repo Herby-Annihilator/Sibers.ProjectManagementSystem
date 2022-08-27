@@ -1,0 +1,109 @@
+﻿@using Sibers.ProjectManagementSystem.Data.Entities
+<MudDialog>
+    <DialogContent>
+        <MudContainer>
+            @if (_projectsList == null)
+            {
+                <MudProgressCircular Color="Color.Default" Indeterminate="true" />
+            }
+            else
+            {
+                <MudTable Style="height:stretch;" Items="_projectsList" FixedHeader="true" FixedFooter="true" 
+                    Hover="true" SortLabel="Sort by" MultiSelection="true" @bind-SelectedItems="_selectedProjects">
+                <HeaderContent>
+                    <MudTh>
+                        <MudTableSortLabel SortBy="new Func<Project, object>(e => e.Id)">
+                            Id
+                        </MudTableSortLabel>
+                    </MudTh>
+                    <MudTh>
+                        <MudTableSortLabel SortBy="new Func<Project, object>(e => e.Name)">
+                            Название
+                        </MudTableSortLabel>
+                    </MudTh>
+                    <MudTh>
+                        <MudTableSortLabel SortBy="new Func<Project, object>(e => e.StartDate)">
+                            Дата начала
+                        </MudTableSortLabel>
+                    </MudTh>
+                    <MudTh>
+                        <MudTableSortLabel SortBy="new Func<Project, object>(e => e.EndDate)">
+                            Дата окончания
+                        </MudTableSortLabel>
+                    </MudTh>
+                    <MudTh>
+                        <MudTableSortLabel SortBy="new Func<Project, object>(e => e.NameOfCustomerCompany)">
+                            Компания-заказчик
+                        </MudTableSortLabel>
+                    </MudTh>
+                    <MudTh>
+                        <MudTableSortLabel SortBy="new Func<Project, object>(e => e.NameOfContractorCompany)">
+                            Компания-исполнитель
+                        </MudTableSortLabel>
+                    </MudTh>
+                    <MudTh>
+                        <MudTableSortLabel SortBy="new Func<Project, object>(e => e.Priority)">
+                            Приоритет
+                        </MudTableSortLabel>
+                    </MudTh>
+                </HeaderContent>
+                <RowTemplate Context="pr">
+                    <MudTd DataLabel="Id">@pr.Id</MudTd>
+                    <MudTd DataLabel="Name">@pr.Name</MudTd>
+                    <MudTd DataLabel="StartDate">@pr.StartDate</MudTd>
+                    <MudTd DataLabel="EndDate">@pr.EndDate</MudTd>
+                    <MudTd DataLabel="NameOfCustomerCompany">@pr.NameOfCustomerCompany</MudTd>
+                    <MudTd DataLabel="NameOfContractorCompany">@pr.NameOfContractorCompany</MudTd>
+                    <MudTd DataLabel="Priority">@pr.Priority</MudTd>
+                </RowTemplate>
+                <PagerContent>
+                    <MudTablePager PageSizeOptions="new int[] { 10, 25, 50, 100 }"/>
+                </PagerContent>
+            </MudTable>
+            }
+        </MudContainer>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Ok">Выбрать</MudButton>
+    </DialogActions>
+</MudDialog>
+
+
+@code {
+    [CascadingParameter]
+    private MudDialogInstance MudDialog { get; set; }
+    private IEnumerable<Project> _projectsList;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetEmployees();
+    }
+    private HashSet<Project> _selectedProjects = new HashSet<Project>();
+
+    private Task GetEmployees()
+    {
+        return Task.Factory.StartNew(() =>
+        {
+            int employeesCount = 33;
+            int id;
+            Project[] projects = new Project[employeesCount];
+            for (int i = 0; i < employeesCount; i++)
+            {
+                id = i + 1;
+                projects[i] = new Project
+                {
+                    Id = id,
+                    Name = $"Project_{id}",
+                    StartDate = DateTime.Now,
+                    EndDate = DateTime.Now,
+                    Priority = id,
+                    NameOfCustomerCompany = $"Customer_{id}",
+                    NameOfContractorCompany = $"Contractor_{id}",
+                };
+            }
+            _projectsList = projects;
+        });
+    }
+
+    private void Ok() => MudDialog.Close(DialogResult.Ok(true));
+}

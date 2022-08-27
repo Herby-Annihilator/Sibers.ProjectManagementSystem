@@ -1,4 +1,5 @@
 ﻿@using Sibers.ProjectManagementSystem.Data.Entities
+@inject IDialogService DialogService
 <MudDialog>
     <DialogContent>
         <MudContainer Style="max-height: 700px; overflow-y: scroll; width:max-content;">
@@ -53,7 +54,7 @@
                                 </MudItem>
                             </MudGrid>
                             <MudText Typo="Typo.h6" GutterBottom="true">Сотрудники на проекте</MudText>
-                            <MudButton Variant="Variant.Filled" Color="Color.Success" Class="mb-3">
+                            <MudButton Variant="Variant.Filled" Color="Color.Success" Class="mb-3" @onclick="OnEmplyeeSelecting">
                                 Добавить сотрудника
                             </MudButton>
                             <MudTable Items="_employees" FixedHeader="true" FixedFooter="true" Hover="true" SortLabel="Sort by">
@@ -94,7 +95,7 @@
                                     <MudTd DataLabel="Patronymic">@emp.Patronymic</MudTd>
                                     <MudTd DataLabel="Email">@emp.Email</MudTd>
                                     <MudTd>
-                                        <MudButton Color="Color.Error" Variant="Variant.Filled">
+                                        <MudButton Color="Color.Error" Variant="Variant.Filled" @onclick="(() => OnEmployeeDeleting(emp.Id))">
                                             Снять с проекта
                                         </MudButton>                                       
                                     </MudTd>
@@ -175,5 +176,27 @@
             }
             _employees = employees;
         });
+    }
+
+    private void OnEmplyeeSelecting()
+    {
+         DialogOptions options = new DialogOptions
+            {
+                CloseButton = true,
+                CloseOnEscapeKey = true,
+                MaxWidth = MaxWidth.Large,
+                FullWidth = true
+            };
+        var dialog = DialogService.Show<SelectEmployeeDialog>("Выбор сотрудников", options);
+    }
+
+    private async Task OnEmployeeDeleting(int employeeId)
+    {
+        bool? result = await DialogService.ShowMessageBox(
+            title: "Снять сотрудника",
+            markupMessage: new MarkupString("Снять сотрудника? Это действие нельзя будет отменить"),
+            yesText: "Снять",
+            cancelText: "Отмена"
+        );
     }
 }

@@ -1,0 +1,55 @@
+﻿@using Sibers.ProjectManagementSystem.Data.Entities
+
+
+<MudDialog>
+    <DialogContent>
+        <MudText GutterBottom="true" Typo="Typo.h4" Align="Align.Center">@_project.Name</MudText>
+        <MudDivider/>
+        <MudText Class="mt-5" GutterBottom="true" Typo="Typo.h6">ФИО сотрудника</MudText>
+        <MudText>@_employee.FirstName @_employee.LastName @_employee.Patronymic</MudText>
+        <MudSelect T="string" Label="Роль на проекте" AnchorOrigin="Origin.BottomCenter">
+            @foreach (var item in _rolesInProject)
+            {
+                <MudSelectItem Value="@item.Name"/>
+            }
+        </MudSelect>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Color="Color.Default" OnClick="Cancel">Отмена</MudButton>
+        <MudButton Color="Color.Primary" OnClick="Submit">Принять</MudButton>
+    </DialogActions>
+</MudDialog>
+
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+    private List<RoleInProject> _rolesInProject = new List<RoleInProject>
+    {
+        new RoleInProject
+        {
+            Name = "Руководитель",
+            Id = 1
+        },
+        new RoleInProject
+        {
+            Name = "Сотрудник",
+            Id = 2
+        }
+    };
+
+    private Project _project = new Project
+        {
+            Name = "Проект какой-то",
+        };
+    private Employee _employee = new Employee
+        {
+            FirstName = "Иванов",
+            LastName = "Иван",
+            Patronymic = "Иванович",
+            Email = "ivanov_pes@yandex.ru"
+        };
+
+    void Submit() => MudDialog.Close(DialogResult.Ok(true));
+    void Cancel() => MudDialog.Cancel();
+}

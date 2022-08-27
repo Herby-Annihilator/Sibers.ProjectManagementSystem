@@ -1,0 +1,95 @@
+﻿@using Sibers.ProjectManagementSystem.Data.Entities
+<MudDialog>
+    <DialogContent>
+        <MudContainer>
+            @if (_employeesList == null)
+            {
+                <MudProgressCircular Color="Color.Default" Indeterminate="true" />
+            }
+            else
+            {
+                <MudTable Style="height:stretch;" Items="_employeesList" FixedHeader="true" FixedFooter="true" 
+                    Hover="true" SortLabel="Sort by" MultiSelection="true" @bind-SelectedItems="_selectedEmployees">
+                <HeaderContent>
+                    <MudTh>
+                        <MudTableSortLabel SortBy="new Func<Employee, object>(e => e.Id)">
+                            Id
+                        </MudTableSortLabel>
+                    </MudTh>
+                    <MudTh>
+                        <MudTableSortLabel SortBy="new Func<Employee, object>(e => e.FirstName)">
+                            Фамилия
+                        </MudTableSortLabel>
+                    </MudTh>
+                    <MudTh>
+                        <MudTableSortLabel SortBy="new Func<Employee, object>(e => e.LastName)">
+                            Имя
+                        </MudTableSortLabel>
+                    </MudTh>
+                    <MudTh>
+                        <MudTableSortLabel SortBy="new Func<Employee, object>(e => e.Patronymic)">
+                            Отчество
+                        </MudTableSortLabel>
+                    </MudTh>
+                    <MudTh>
+                        <MudTableSortLabel SortBy="new Func<Employee, object>(e => e.Email)">
+                            Email
+                        </MudTableSortLabel>
+                    </MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd DataLabel="Id">@context.Id</MudTd>
+                    <MudTd DataLabel="FirstName">@context.FirstName</MudTd>
+                    <MudTd DataLabel="LastName">@context.LastName</MudTd>
+                    <MudTd DataLabel="Patronymic">@context.Patronymic</MudTd>
+                    <MudTd DataLabel="Email">@context.Email</MudTd>
+                </RowTemplate>
+                <PagerContent>
+                    <MudTablePager PageSizeOptions="new int[] { 10, 25, 50, 100 }"/>
+                </PagerContent>
+            </MudTable>
+            }
+        </MudContainer>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Ok">Выбрать</MudButton>
+    </DialogActions>
+</MudDialog>
+
+
+@code {
+    [CascadingParameter]
+    private MudDialogInstance MudDialog { get; set; }
+    private IEnumerable<Employee> _employeesList;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetEmployees();
+    }
+    private HashSet<Employee> _selectedEmployees = new HashSet<Employee>();
+
+    private Task GetEmployees()
+    {
+        return Task.Factory.StartNew(() =>
+        {
+            int employeesCount = 33;
+            int id;
+            Employee[] employees = new Employee[employeesCount];
+            for (int i = 0; i < employeesCount; i++)
+            {
+                id = i + 1;
+                employees[i] = new Employee
+                {
+                    Id = id,
+                    FirstName = $"EmployeeFirstName_{id}",
+                    LastName = $"EmployeeLastName_{id}",
+                    Patronymic = $"EmployeePatronymic_{id}",
+                    Email = $"employee_{id}_@gmail.com"
+                };
+            }
+            _employeesList = employees;
+        });
+    }
+
+    private void Ok() => MudDialog.Close(DialogResult.Ok(true));
+}

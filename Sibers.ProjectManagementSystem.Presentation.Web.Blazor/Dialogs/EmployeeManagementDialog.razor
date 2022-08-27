@@ -47,10 +47,10 @@
                                     <MudTd DataLabel="Название проекта">@ep.Project.Name</MudTd>
                                     <MudTd DataLabel="Роль на проекте">@ep.RoleInProject.Name</MudTd>
                                     <MudTd DataLabel="Действие">
-                                        <MudButton Color="Color.Tertiary" Variant="Variant.Filled">
+                                        <MudButton Color="Color.Tertiary" Variant="Variant.Filled" @onclick="OnChangeEmployeesRole">
                                             Изменить роль
                                         </MudButton>
-                                        <MudButton Color="Color.Primary" Variant="Variant.Filled">
+                                        <MudButton Color="Color.Primary" Variant="Variant.Filled" @onclick="OnTransferEmployeeToAnotherProject">
                                             Перевести
                                         </MudButton>
                                         <MudButton Color="Color.Error" Variant="Variant.Filled" @onclick="@(() => OnEmployeeDeleting(@_employee.Id))">
@@ -87,6 +87,30 @@
             yesText: "Снять",
             cancelText: "Отмена"
         );
+    }
+
+    private void OnChangeEmployeesRole()
+    {
+         DialogOptions options = new DialogOptions
+            {
+                CloseButton = true,
+                CloseOnEscapeKey = true,
+                MaxWidth = MaxWidth.Medium,
+                FullWidth = true
+            };
+        var dialog = DialogService.Show<ChangeEmployeesRoleDialog>("Изменение роли сотрудника", options);
+    }
+
+    private void OnTransferEmployeeToAnotherProject()
+    {
+         DialogOptions options = new DialogOptions
+            {
+                CloseButton = true,
+                CloseOnEscapeKey = true,
+                MaxWidth = MaxWidth.Medium,
+                FullWidth = true
+            };
+        var dialog = DialogService.Show<TransferEmloyeeToAnotherProject>("Перевод сотрудника", options);
     }
 
     private Employee _employee = new Employee
