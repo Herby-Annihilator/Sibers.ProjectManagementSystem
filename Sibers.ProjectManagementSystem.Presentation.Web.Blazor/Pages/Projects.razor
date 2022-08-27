@@ -15,7 +15,7 @@ else
     <MudText Typo="Typo.h3" GutterBottom="true">Проекты</MudText>
     @if (_projects.Count() == 0)
     {
-        <MudText Typo="Typo.h5" GutterBottom="true">Здесь нихуя нету</MudText>
+        <MudText Typo="Typo.h5" GutterBottom="true">Здесь ничего нет</MudText>
     }
     else
     {
@@ -34,7 +34,7 @@ else
                             <MudText Typo="Typo.body2">The quick, brown fox jumps over a lazy dog.</MudText>
                         </MudCardContent>
                         <MudCardActions>
-                            <MudButton Variant="Variant.Outlined" Color="Color.Info">Подробнее</MudButton>
+                            <MudButton Variant="Variant.Outlined" Color="Color.Info" @onclick="OnWatchProject">Подробнее</MudButton>
                             <MudButton Class="ms-3" Variant="Variant.Outlined" Color="Color.Primary" @onclick="OpenDialog">
                                 Управление
                             </MudButton>
@@ -61,6 +61,18 @@ else
                 FullWidth = true
             };
         var dialog = DialogService.Show<CreateProjectDialog>("Создание проекта", options);
+    }
+
+    private void OnWatchProject()
+    {
+        var options = new DialogOptions
+            {
+                CloseButton = true,
+                CloseOnEscapeKey = true,
+                MaxWidth = MaxWidth.Large,
+                FullWidth = true
+            };
+        var dialog = DialogService.Show<WatchProjectDialog>("Информация о проекте", options);
     }
 
     private async void OnProjectDeleting(int projectId)
