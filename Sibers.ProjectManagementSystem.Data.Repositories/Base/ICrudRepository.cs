@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Sibers.ProjectManagementSystem.Data.Repositories.Base
 {
-    public interface ICrudRepository<T> : IDisposable where T : class
+    public interface ICrudRepository<T> : IDisposable where T : Entity
     {
         bool AutoSaveChanges { get; set; }
         bool SaveChanges();

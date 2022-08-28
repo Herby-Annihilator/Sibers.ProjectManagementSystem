@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Sibers.ProjectManagementSystem.Data.Repositories.Defaults
 {
-    public class DefaultCrudRepository<T> : ICrudRepository<T> where T : class
+    public class DefaultCrudRepository<T> : ICrudRepository<T> where T : Entity
     {
         protected DbContext context;
         protected DbSet<T> entitySet;

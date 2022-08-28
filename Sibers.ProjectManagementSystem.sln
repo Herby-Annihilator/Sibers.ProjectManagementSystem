@@ -9,13 +9,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Sibers.ProjectManagementSys
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Sibers.ProjectManagementSystem.Presentation.Web.Blazor", "Sibers.ProjectManagementSystem.Presentation.Web.Blazor", "{45608106-0349-46F8-A4C5-D2068587B7F6}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Sibers.ProjectManagementSystem.Presentation.Web.MVC", "Sibers.ProjectManagementSystem.Presentation.Web.MVC", "{81BD00F0-E238-41B0-B10D-D58300F6A3B8}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sibers.ProjectManagementSystem.Presentation.Web.MVC", "Sibers.ProjectManagementSystem.Presentation.Web.MVC\Sibers.ProjectManagementSystem.Presentation.Web.MVC.csproj", "{0181FA6B-3651-4A03-B6F9-A6723697A10E}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Sibers.ProjectManagementSystem.Data", "Sibers.ProjectManagementSystem.Data", "{B272EBD9-CFAE-445D-8711-AFB8B9735D45}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Sibers.ProjectManagementSystem.Tests", "Sibers.ProjectManagementSystem.Tests", "{0CEA63EB-ABE4-4C46-A84A-01F662919AE2}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sibers.ProjectManagementSystem.Data.MSSQL", "Sibers.ProjectManagementSystem.Data.MSSQL\Sibers.ProjectManagementSystem.Data.MSSQL.csproj", "{3D2F8057-27FB-4269-8316-A27F11FA6EFD}"
 EndProject
@@ -29,10 +23,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sibers.ProjectManagementSys
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sibers.ProjectManagementSystem.Data.UnitsOfWork", "Sibers.ProjectManagementSystem.Data.UnitsOfWork\Sibers.ProjectManagementSystem.Data.UnitsOfWork.csproj", "{93579A72-2FA2-4C27-B372-AD79E7AF51E5}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Sibers.ProjectManagementSystem.Services", "Sibers.ProjectManagementSystem.Services", "{270A9E39-0251-4990-A18F-2108ED123F2B}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sibers.ProjectManagementSystem.Services.Utilities", "Sibers.ProjectManagementSystem.Services.Utilities\Sibers.ProjectManagementSystem.Services.Utilities.csproj", "{76E968D7-69A9-47D0-8841-6AED0658082E}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sibers.ProjectManagementSystem.Presentation.Web.Blazor", "Sibers.ProjectManagementSystem.Presentation.Web.Blazor\Sibers.ProjectManagementSystem.Presentation.Web.Blazor.csproj", "{75B41171-646B-4232-89BF-E7E8F091670F}"
 EndProject
 Global
@@ -41,10 +31,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{0181FA6B-3651-4A03-B6F9-A6723697A10E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0181FA6B-3651-4A03-B6F9-A6723697A10E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0181FA6B-3651-4A03-B6F9-A6723697A10E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0181FA6B-3651-4A03-B6F9-A6723697A10E}.Release|Any CPU.Build.0 = Release|Any CPU
 		{3D2F8057-27FB-4269-8316-A27F11FA6EFD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{3D2F8057-27FB-4269-8316-A27F11FA6EFD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3D2F8057-27FB-4269-8316-A27F11FA6EFD}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -69,10 +55,6 @@ Global
 		{93579A72-2FA2-4C27-B372-AD79E7AF51E5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{93579A72-2FA2-4C27-B372-AD79E7AF51E5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{93579A72-2FA2-4C27-B372-AD79E7AF51E5}.Release|Any CPU.Build.0 = Release|Any CPU
-		{76E968D7-69A9-47D0-8841-6AED0658082E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{76E968D7-69A9-47D0-8841-6AED0658082E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{76E968D7-69A9-47D0-8841-6AED0658082E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{76E968D7-69A9-47D0-8841-6AED0658082E}.Release|Any CPU.Build.0 = Release|Any CPU
 		{75B41171-646B-4232-89BF-E7E8F091670F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{75B41171-646B-4232-89BF-E7E8F091670F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{75B41171-646B-4232-89BF-E7E8F091670F}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -84,14 +66,11 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{59332EAA-FBAD-4244-B9ED-C0894DE05A6E} = {9319F6CC-3B5A-4F94-8371-8999D4593632}
 		{45608106-0349-46F8-A4C5-D2068587B7F6} = {59332EAA-FBAD-4244-B9ED-C0894DE05A6E}
-		{81BD00F0-E238-41B0-B10D-D58300F6A3B8} = {59332EAA-FBAD-4244-B9ED-C0894DE05A6E}
-		{0181FA6B-3651-4A03-B6F9-A6723697A10E} = {81BD00F0-E238-41B0-B10D-D58300F6A3B8}
 		{3D2F8057-27FB-4269-8316-A27F11FA6EFD} = {B272EBD9-CFAE-445D-8711-AFB8B9735D45}
 		{33D64EF1-104D-4B81-9673-046EC087CF7A} = {B272EBD9-CFAE-445D-8711-AFB8B9735D45}
 		{F15AC007-40D5-4145-A840-3923F7B06B81} = {B272EBD9-CFAE-445D-8711-AFB8B9735D45}
 		{2A747CDB-D6DD-4093-A489-B0430A0C8C6A} = {B272EBD9-CFAE-445D-8711-AFB8B9735D45}
 		{93579A72-2FA2-4C27-B372-AD79E7AF51E5} = {B272EBD9-CFAE-445D-8711-AFB8B9735D45}
-		{76E968D7-69A9-47D0-8841-6AED0658082E} = {270A9E39-0251-4990-A18F-2108ED123F2B}
 		{75B41171-646B-4232-89BF-E7E8F091670F} = {45608106-0349-46F8-A4C5-D2068587B7F6}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution

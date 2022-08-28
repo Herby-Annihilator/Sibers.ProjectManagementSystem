@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Sibers.ProjectManagementSystem.Data.Entities.Base;
 using Sibers.ProjectManagementSystem.Data.UnitsOfWork.Base;
 
 namespace Sibers.ProjectManagementSystem.API.Controllers.Base
@@ -8,7 +9,7 @@ namespace Sibers.ProjectManagementSystem.API.Controllers.Base
     [ApiController]
     public class DefaultCrudController<TContext, TEntity> : ControllerBase
         where TContext : DbContext
-        where TEntity : class
+        where TEntity : Entity
     {
         protected IUnitOfWork<TContext> unitOfWork;
         public DefaultCrudController(IUnitOfWork<TContext> unitOfWork)
@@ -36,7 +37,7 @@ namespace Sibers.ProjectManagementSystem.API.Controllers.Base
             if (result == null)
                 return NotFound(entity);
             else
-                return Ok(); //CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
+                return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
         }
 
         [HttpPut]
@@ -48,7 +49,7 @@ namespace Sibers.ProjectManagementSystem.API.Controllers.Base
             if (result == null)
                 return NotFound(entity);
             else
-                return Ok();//AcceptedAtAction(nameof(GetById), new { id = result.Id }, result);
+                return AcceptedAtAction(nameof(GetById), new { id = result.Id }, result);
         }
 
         [HttpDelete]

@@ -24,13 +24,13 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddCors();
 
 var app = builder.Build();
 bool seedData = false;
-if (configuration["SeedData"] == "yes")
+if (configuration["SeedData"].ToLower() == "yes")
     seedData = true;
-app.Services.GetRequiredService<ProjectManagementSystemDbContext>().EnsureSeedData(seedData);
-
+app.Services.CreateScope().ServiceProvider.GetRequiredService<ProjectManagementSystemDbContext>().EnsureSeedData(seedData);
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -43,5 +43,12 @@ if (app.Environment.IsDevelopment())
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.UseCors(x => x
+    .AllowAnyMethod()
+    .AllowAnyHeader()
+    .SetIsOriginAllowed(origin => true) // allow any origin
+                                        //.WithOrigins("https://localhost:44351")); // Allow only this origin can also have multiple origins separated with comma
+    .AllowCredentials()); // allow credentials
 
 app.Run();

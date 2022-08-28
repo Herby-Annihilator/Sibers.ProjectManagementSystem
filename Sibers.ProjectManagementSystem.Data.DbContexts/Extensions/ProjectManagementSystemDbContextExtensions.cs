@@ -51,7 +51,7 @@ namespace Sibers.ProjectManagementSystem.Data.DbContexts.Extensions
                 {
                     new Project
                         {
-                            Id = 1,
+                            //Id = 1,
                             Name = "Test",
                             NameOfCustomerCompany = "Sibers",
                             NameOfContractorCompany = "RukinStudio",
@@ -61,7 +61,7 @@ namespace Sibers.ProjectManagementSystem.Data.DbContexts.Extensions
                         },
                         new Project
                         {
-                            Id = 2,
+                            //Id = 2,
                             Name = "FirstProject",
                             NameOfCustomerCompany = "Some customer company",
                             NameOfContractorCompany = "Microsoft",
@@ -71,7 +71,7 @@ namespace Sibers.ProjectManagementSystem.Data.DbContexts.Extensions
                         },
                         new Project
                         {
-                            Id = 3,
+                            //Id = 3,
                             Name = "Second",
                             NameOfCustomerCompany = "Microsoft",
                             NameOfContractorCompany = "Sibers",
@@ -91,7 +91,7 @@ namespace Sibers.ProjectManagementSystem.Data.DbContexts.Extensions
                 id = i + 1;
                 employees[i] = new Employee
                 {
-                    Id = id,
+                    //Id = id,
                     FirstName = $"EmployeeFirstName_{id}",
                     LastName = $"EmployeeLastName_{id}",
                     Patronymic = $"EmployeePatronymic_{id}",
@@ -105,12 +105,12 @@ namespace Sibers.ProjectManagementSystem.Data.DbContexts.Extensions
             {
                     new RoleInProject
                         {
-                            Id = 1,
+                            //Id = 1,
                             Name = "Руководитель"
                         },
                         new RoleInProject
                         {
-                            Id = 1,
+                            //Id = 1,
                             Name = "Сотрудник"
                         }
             };
@@ -124,9 +124,9 @@ namespace Sibers.ProjectManagementSystem.Data.DbContexts.Extensions
                 {
                     context.EmployeesInProject.Add(new EmployeeInProject
                     {
-                        EmployeeId = j + 1,
-                        ProjectId = i + 1,
-                        RoleInProjectId = j == i * 10 + i ? 1 : 2
+                        Employee = employees[j],
+                        Project = projects[i],
+                        RoleInProject = j == i * 10 + i ? rolesInProject[0] : rolesInProject[1]
                     });
                 }
             }

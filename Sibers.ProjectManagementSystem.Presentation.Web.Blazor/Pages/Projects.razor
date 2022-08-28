@@ -1,8 +1,10 @@
 ﻿@page "/projects"
 @using Sibers.ProjectManagementSystem.Data.Entities
+@using Sibers.ProjectManagementSystem.Data.Repositories.Base
 @using Sibers.ProjectManagementSystem.Presentation.Web.Blazor.Dialogs
 
 @inject IDialogService DialogService
+@inject ICrudRepository<Project> ProjectsRepository
 
 @if (_projects == null)
 {
@@ -19,38 +21,85 @@ else
     }
     else
     {
-        <MudGrid Justify="Justify.Center" Spacing="6">
-            @foreach (var item in _projects)
-            {
-                <MudItem xs="4" Class="d-flex align-items-stretch">
-                    <MudCard Class="mud-width-full">
-                        <MudCardHeader>
-                            <CardHeaderContent>
-                                <MudText Typo="Typo.h6">@item.Name</MudText>
-                            </CardHeaderContent>
-                        </MudCardHeader>
-                        <MudCardContent>
-                            <MudText>@item.NameOfCustomerCompany просит помочь @item.NameOfContractorCompany</MudText>
-                            <MudText Typo="Typo.body2">The quick, brown fox jumps over a lazy dog.</MudText>
-                        </MudCardContent>
-                        <MudCardActions>
-                            <MudButton Variant="Variant.Outlined" Color="Color.Info" @onclick="OnWatchProject">Подробнее</MudButton>
-                            <MudButton Class="ms-3" Variant="Variant.Outlined" Color="Color.Primary" @onclick="OpenDialog">
-                                Управление
-                            </MudButton>
-                            <MudButton @onclick="@(() => OnProjectDeleting(item.Id))" Variant="Variant.Outlined" Color="Color.Error" Class="ms-3">
-                                Удалить
-                            </MudButton>
-                        </MudCardActions>
-                    </MudCard>
-                </MudItem>
-            }
-        </MudGrid>
+        <MudTable Style="height:stretch;" Items="_projects" FixedHeader="true" FixedFooter="true" Hover="true" SortLabel="Sort by">
+            <HeaderContent>
+                <MudTh>
+                    <MudTableSortLabel SortBy="new Func<Project, object>(e => e.Id)">
+                        Id
+                    </MudTableSortLabel>
+                </MudTh>
+                <MudTh>
+                    <MudTableSortLabel SortBy="new Func<Project, object>(e => e.Name)">
+                        Название проекта
+                    </MudTableSortLabel>
+                </MudTh>
+                <MudTh>
+                    <MudTableSortLabel SortBy="new Func<Project, object>(e => e.NameOfCustomerCompany)">
+                        Компания-заказчик
+                    </MudTableSortLabel>
+                </MudTh>
+                <MudTh>
+                    <MudTableSortLabel SortBy="new Func<Project, object>(e => e.NameOfContractorCompany)">
+                        Компания-исполнитель
+                    </MudTableSortLabel>
+                </MudTh>
+                <MudTh>
+                    <MudTableSortLabel SortBy="new Func<Project, object>(e => e.StartDate)">
+                        Дата начала проекта
+                    </MudTableSortLabel>
+                </MudTh>
+                <MudTh>
+                    <MudTableSortLabel SortBy="new Func<Project, object>(e => e.EndDate)">
+                        Дата окончания проекта
+                    </MudTableSortLabel>
+                </MudTh>
+                <MudTh>
+                    <MudTableSortLabel SortBy="new Func<Project, object>(e => e.Priority)">
+                        Приоритет
+                    </MudTableSortLabel>
+                </MudTh>
+                <MudTh Style="width:200px;">
+                    Действие
+                </MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd>@context.Id</MudTd>
+                <MudTd>@context.Name</MudTd>
+                <MudTd>@context.NameOfCustomerCompany</MudTd>
+                <MudTd>@context.NameOfContractorCompany</MudTd>
+                <MudTd>@context.StartDate</MudTd>
+                <MudTd>@context.EndDate</MudTd>
+                <MudTd>@context.Priority</MudTd>
+                <MudTd>
+                    <MudIconButton Color="Color.Info" Variant="Variant.Filled" Icon="@Icons.Filled.RemoveRedEye" @onclick="@(() => OnWatchProject(context.Id))">
+                    </MudIconButton>
+                    <MudIconButton Color="Color.Success" Variant="Variant.Filled" Icon="@Icons.Filled.Edit" @onclick="@(() => OnProjectEdit(context.Id))">
+                    </MudIconButton>
+                    <MudIconButton Color="Color.Error" Variant="Variant.Filled" Icon="@Icons.Filled.Delete" @onclick="@(() => OnProjectDeleting(context.Id))">
+                    </MudIconButton>
+                </MudTd>
+            </RowTemplate>
+            <PagerContent>
+                <MudTablePager PageSizeOptions="new int[] { 10, 25, 50, 100 }"/>
+            </PagerContent>
+        </MudTable>
     }   
 }
 
 
 @code {
+    private ICollection<Project> _projects;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await FillProjects();
+    }
+
+    private async Task FillProjects()
+    {
+        _projects = (ICollection<Project>)await ProjectsRepository.GetAllAsync();
+    }
+
     private void OnCreateProject()
     {
         var options = new DialogOptions
@@ -63,7 +112,7 @@ else
         var dialog = DialogService.Show<CreateProjectDialog>("Создание проекта", options);
     }
 
-    private void OnWatchProject()
+    private async Task OnWatchProject(int projectId)
     {
         var options = new DialogOptions
             {
@@ -72,7 +121,10 @@ else
                 MaxWidth = MaxWidth.Large,
                 FullWidth = true
             };
-        var dialog = DialogService.Show<WatchProjectDialog>("Информация о проекте", options);
+        Project project = await ProjectsRepository.GetByIdAsync(projectId);
+        DialogParameters parameters = new DialogParameters();
+        parameters.Add("project", project);
+        var dialog = DialogService.Show<WatchProjectDialog>("Информация о проекте", parameters, options);
     }
 
     private async void OnProjectDeleting(int projectId)
@@ -83,11 +135,14 @@ else
             yesText: "Удалить",
             cancelText: "Отмена"
         );
+        if (result != null && result == true)
+        {
+            await ProjectsRepository.DeleteEntityAsync(projectId);
+            _projects.Remove(_projects.First(p => p.Id == projectId));
+        }
     }
 
-    private IEnumerable<Project> _projects;
-
-    protected void OpenDialog()
+    protected void OnProjectEdit(int projectId)
     {
         var options = new DialogOptions
             {
@@ -96,52 +151,12 @@ else
                 MaxWidth = MaxWidth.Large,
                 FullWidth = true
             };
-        var dialog = DialogService.Show<ProjectManagementDialog>("Управление проектом", options);
-    }
+        Project project = ProjectsRepository.GetById(projectId);
+        DialogParameters parameters = new DialogParameters();
+        parameters.Add("project", project);
+        var dialog = DialogService.Show<ProjectManagementDialog>("Управление проектом", parameters, options);
 
-    protected override async Task OnInitializedAsync()
-    {
-        await FillProjects();
-    }
-
-    private Task FillProjects()
-    {
-        return Task.Factory.StartNew(() =>
-        {
-            Project[] projects = new Project[]
-                {
-                    new Project
-                        {
-                            Id = 1,
-                            Name = "Test",
-                            NameOfCustomerCompany = "Sibers",
-                            NameOfContractorCompany = "RukinStudio",
-                            Priority = 10,
-                            StartDate = new DateTime(2022, 8, 22),
-                            EndDate = new DateTime(2022, 8, 29)
-                        },
-                        new Project
-                        {
-                            Id = 2,
-                            Name = "FirstProject",
-                            NameOfCustomerCompany = "Some customer company",
-                            NameOfContractorCompany = "Microsoft",
-                            Priority = 5,
-                            StartDate = new DateTime(2021, 8, 22),
-                            EndDate = new DateTime(2022, 8, 29)
-                        },
-                        new Project
-                        {
-                            Id = 3,
-                            Name = "Second",
-                            NameOfCustomerCompany = "Microsoft",
-                            NameOfContractorCompany = "Sibers",
-                            Priority = 7,
-                            StartDate = new DateTime(2022, 1, 22),
-                            EndDate = new DateTime(2022, 12, 29)
-                        }
-                };
-            _projects = projects;
-        });
+        _projects.Remove(project);
+        _projects.Add(project);
     }
 }

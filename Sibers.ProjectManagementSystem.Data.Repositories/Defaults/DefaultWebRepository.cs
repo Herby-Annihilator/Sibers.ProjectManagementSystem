@@ -1,4 +1,5 @@
-﻿using Sibers.ProjectManagementSystem.Data.Repositories.Base;
+﻿using Sibers.ProjectManagementSystem.Data.Entities.Base;
+using Sibers.ProjectManagementSystem.Data.Repositories.Base;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,9 +8,9 @@ using System.Net.Http.Json;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Sibers.ProjectManagementSystem.Data.Repositories
+namespace Sibers.ProjectManagementSystem.Data.Repositories.Defaults
 {
-    public class DefaultWebRepository<TEntity> : ICrudRepository<TEntity> where TEntity : class
+    public class DefaultWebRepository<TEntity> : ICrudRepository<TEntity> where TEntity : Entity
     {
         protected HttpClient client;
         public DefaultWebRepository(HttpClient httpClient)

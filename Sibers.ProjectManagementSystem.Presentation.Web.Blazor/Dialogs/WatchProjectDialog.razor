@@ -1,5 +1,8 @@
 ﻿@using Sibers.ProjectManagementSystem.Data.Entities
+@using Sibers.ProjectManagementSystem.Data.Repositories.Base
 @inject IDialogService DialogService
+@inject ICrudRepository<Project> ProjectRepository
+
 <MudDialog DisableSidePadding="true">
     <DialogContent>
         <MudContainer Style="max-height: 700px; overflow-y: scroll">
