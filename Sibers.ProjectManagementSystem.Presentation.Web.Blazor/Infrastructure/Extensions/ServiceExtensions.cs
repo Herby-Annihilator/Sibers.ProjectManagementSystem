@@ -8,7 +8,7 @@ namespace Sibers.ProjectManagementSystem.Presentation.Web.Blazor.Infrastructure.
         public static IHttpClientBuilder AddApi<IInterface, IClient>(this IServiceCollection services, string Address)
             where IInterface : class where IClient : class, IInterface => services
            .AddHttpClient<IInterface, IClient>(
-                (host, client) => client.BaseAddress = new($"https://localhost:5001/{Address}"));
+                (host, client) => client.BaseAddress = new($"https://localhost:7141/{Address}/"));
 
     }
 }

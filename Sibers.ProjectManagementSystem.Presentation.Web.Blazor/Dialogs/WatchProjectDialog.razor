@@ -6,30 +6,30 @@
 <MudDialog DisableSidePadding="true">
     <DialogContent>
         <MudContainer Style="max-height: 700px; overflow-y: scroll">
-            @if (project == null)
+            @if (Project == null)
             {
                 <MudProgressCircular Indeterminate="true"></MudProgressCircular>
             }
             else
             {
-                <MudText GutterBottom="true" Typo="Typo.h4" Align="Align.Center">@project.Name (приоритет @project.Priority)</MudText>
+                <MudText GutterBottom="true" Typo="Typo.h4" Align="Align.Center">@Project.Name (приоритет @Project.Priority)</MudText>
                 <MudDivider Class="mb-4 mt-2"/>
                 <MudGrid>
                     <MudItem xs="3">
                         <MudText>Заказчик</MudText>
-                        <MudText Typo="Typo.h5">@project.NameOfCustomerCompany</MudText>
+                        <MudText Typo="Typo.h5">@Project.NameOfCustomerCompany</MudText>
                     </MudItem>
                     <MudItem xs="3">
                         <MudText>Разработчик</MudText>
-                        <MudText Typo="Typo.h5">@project.NameOfContractorCompany</MudText>
+                        <MudText Typo="Typo.h5">@Project.NameOfContractorCompany</MudText>
                     </MudItem>
                     <MudItem xs="3">
                         <MudText>Дата начала</MudText>
-                        <MudText Typo="Typo.h5">@DateFormat(project.StartDate)</MudText>
+                        <MudText Typo="Typo.h5">@DateFormat(Project.StartDate)</MudText>
                     </MudItem>
                     <MudItem xs="3">
                         <MudText>Дата окончания</MudText>
-                        <MudText Typo="Typo.h5">@DateFormat(project.EndDate)</MudText>
+                        <MudText Typo="Typo.h5">@DateFormat(Project.EndDate)</MudText>
                     </MudItem>
                 </MudGrid>
                 <MudText GutterBottom="true" Typo="Typo.h5" Class="mt-5">Руководитель</MudText>
@@ -118,6 +118,9 @@
             StartDate = new DateTime(2022, 1, 1),
             EndDate = new DateTime(2022, 12, 31),
         };
+
+    [Parameter]
+    public Project Project { get; set; }
 
     private bool _loading = false;
     private DateTime? _projectStartDate;

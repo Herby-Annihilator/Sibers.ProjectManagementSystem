@@ -91,10 +91,10 @@ namespace Sibers.ProjectManagementSystem.Data.Repositories.Defaults
         public virtual async Task<IEnumerable<T>> GetAllAsync(CancellationToken cancellationToken = default) =>
             await entitySet.ToArrayAsync(cancellationToken).ConfigureAwait(false);
 
-        public virtual T GetById(int id) => entitySet.Find(id);
+        public virtual T GetById(int id) => entitySet.FirstOrDefault(e => e.Id == id);
 
         public virtual async Task<T> GetByIdAsync(int id, CancellationToken cancellationToken = default) =>
-            await entitySet.FindAsync(id, cancellationToken).ConfigureAwait(false);
+            await entitySet.FirstOrDefaultAsync(e => e.Id == id, cancellationToken).ConfigureAwait(false);
 
         public virtual bool SaveChanges() => context.SaveChanges() > 0 ? true : false;
 
