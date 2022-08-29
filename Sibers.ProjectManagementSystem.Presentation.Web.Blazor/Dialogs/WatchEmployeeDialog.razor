@@ -2,7 +2,7 @@
 <MudDialog>
     <DialogContent>
         <MudContainer>
-            @if (_employee == null)
+            @if (EmployeeToWatch == null)
             {
                 <MudProgressCircular Indeterminate="true"></MudProgressCircular>
             }
@@ -12,24 +12,24 @@
                    Фамилия Имя Отчество
                </MudText>
                 <MudText GutterBottom="true" Typo="Typo.h4">
-                    @_employeeFullName
+                    @EmployeeToWatch.FirstName @EmployeeToWatch.LastName @EmployeeToWatch.Patronymic
                 </MudText>
                 <MudText GutterBottom="true" Typo="Typo.h6">
                    Email
                </MudText>
                 <MudText GutterBottom="true" Typo="Typo.h4">
-                    @_employee.Email
+                    @EmployeeToWatch.Email
                 </MudText>
                 <MudText Typo="Typo.h5" GutterBottom="true" Class="mt-5">
                     Задействован на проектах
                 </MudText>
-                @if (_employee.EmployeesInProject == null)
+                @if (EmployeeToWatch.EmployeesInProject == null)
                 {
                     <MudProgressCircular Indeterminate="true"></MudProgressCircular>
                 }
                 else
                 {
-                    <MudTable Items="_employee.EmployeesInProject" Hover="true">
+                    <MudTable Items="EmployeeToWatch.EmployeesInProject" Hover="true">
                         <HeaderContent>
                             <MudTh>
                                 Название проекта
@@ -39,8 +39,8 @@
                             </MudTh>
                         </HeaderContent>
                         <RowTemplate Context="ep">
-                            <MudTd DataLabel="Название проекта">@ep.Project.Name</MudTd>
-                            <MudTd DataLabel="Роль на проекте">@ep.RoleInProject.Name</MudTd>
+                            <MudTd DataLabel="Название проекта">@ep.Project?.Name</MudTd>
+                            <MudTd DataLabel="Роль на проекте">@ep.RoleInProject?.Name</MudTd>
                         </RowTemplate>
                         <PagerContent>
                             <MudTablePager PageSizeOptions="new int[] { 5, 10, 15}"/>
@@ -61,44 +61,10 @@
 
     protected override Task OnInitializedAsync()
     {
-        _employeeFullName = $"{_employee.FirstName} {_employee.LastName} {_employee.Patronymic}";
         return base.OnInitializedAsync();
     }
-
-    private string _employeeFullName;
-    private Employee _employee = new Employee
-        {
-            FirstName = "Иванов",
-            LastName = "Петр",
-            Patronymic = "Сидорович",
-            Email = "ivanov_ps@mail.ru",
-            Id = 15,
-            EmployeesInProject = new List<EmployeeInProject>()
-            {
-                new EmployeeInProject()
-                {
-                    Project = new Project
-                    {
-                        Name = "Какой-то проект"
-                    },
-                    RoleInProject = new RoleInProject
-                    {
-                        Name = "Руководитель"
-                    }
-                },
-                new EmployeeInProject()
-                {
-                    Project = new Project
-                    {
-                        Name = "Другой проект"
-                    },
-                    RoleInProject = new RoleInProject
-                    {
-                        Name = "Сотрудник"
-                    }
-                }
-            },
-        };
+    [Parameter]
+    public Employee EmployeeToWatch { get; set; }
 
     private void Cancel() => MudDialog.Cancel();
 }

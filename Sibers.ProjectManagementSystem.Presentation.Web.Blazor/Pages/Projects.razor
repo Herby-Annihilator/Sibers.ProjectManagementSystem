@@ -2,6 +2,8 @@
 @using Sibers.ProjectManagementSystem.Data.Entities
 @using Sibers.ProjectManagementSystem.Data.Repositories.Base
 @using Sibers.ProjectManagementSystem.Presentation.Web.Blazor.Dialogs
+@using Sibers.ProjectManagementSystem.Presentation.Web.Blazor.Infrastructure.Commands
+@using Sibers.ProjectManagementSystem.Presentation.Web.Blazor.Infrastructure.Commands.Base
 
 @inject IDialogService DialogService
 @inject ICrudRepository<Project> ProjectsRepository
@@ -114,17 +116,9 @@ else
 
     private async Task OnWatchProject(int projectId)
     {
-        var options = new DialogOptions
-            {
-                CloseButton = true,
-                CloseOnEscapeKey = true,
-                MaxWidth = MaxWidth.Large,
-                FullWidth = true
-            };
         Project project = await ProjectsRepository.GetByIdAsync(projectId);
-        DialogParameters parameters = new DialogParameters();
-        parameters.Add("Project", project);
-        var dialog = DialogService.Show<WatchProjectDialog>("Информация о проекте", parameters, options);
+        ICommand command = new ShowWatchProjectDialogCommand(DialogService);
+        command.Execute(project);
     }
 
     private async void OnProjectDeleting(int projectId)
