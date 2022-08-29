@@ -35,6 +35,20 @@
                                 Required="true" RequiredError="Это обязательное поле!"/>
                         </MudItem>
                     </MudGrid>
+
+                    <MudText Typo="Typo.h5" GutterBottom="true">
+                        Руководитель
+                    </MudText>
+                    <MudGrid Class="mb-3">
+                        <MudItem xs="9">
+                            <MudTextField @bind-Value="_managerFullName" Label="ФИО руководителя" ReadOnly="true" Variant="Variant.Text" />
+                        </MudItem>
+                        <MudItem xs="3">
+                            <MudButton Color="Color.Primary" Variant="Variant.Filled">
+                                Назначить
+                            </MudButton>
+                        </MudItem>
+                    </MudGrid>
                         
                     @if (_employees == null)
                     {
@@ -42,19 +56,6 @@
                     }
                     else
                     {
-                        <MudText Typo="Typo.h5" GutterBottom="true">
-                            Руководитель
-                        </MudText>
-                        <MudGrid Class="mb-3">
-                            <MudItem xs="9">
-                                <MudTextField @bind-Value="_managerFullName" Label="ФИО руководителя" ReadOnly="true" Variant="Variant.Text" />
-                            </MudItem>
-                            <MudItem xs="3">
-                                <MudButton Color="Color.Primary" Variant="Variant.Filled">
-                                    Назначить
-                                </MudButton>
-                            </MudItem>
-                        </MudGrid>
                         <MudText Typo="Typo.h6" GutterBottom="true">Сотрудники на проекте</MudText>
                         <MudButton Variant="Variant.Filled" Color="Color.Success" Class="mb-3" @onclick="OnEmplyeeSelecting">
                             Добавить сотрудника
@@ -124,7 +125,7 @@
     [CascadingParameter] 
     MudDialogInstance MudDialog { get; set; }
 
-    private ICollection<Employee> _employees;
+    private ICollection<Employee> _employees = new List<Employee>();
     private Employee _manager = new Employee();
     private string _managerFullName = "";
 
@@ -143,17 +144,16 @@
     private bool _loading = false;
     private DateTime? _projectStartDate = DateTime.Now;
     private DateTime? _projectEndDate = DateTime.Now;
+    private RoleInProject _managerRole;
+    private RoleInProject _employeeRole;
 
-    private async Task Submit()
+    protected override async Task OnInitializedAsync()
     {
-        project.StartDate = _projectStartDate.Value;
-        project.EndDate = _projectEndDate.Value;
-
-        var result = await ProjectRepository.AddEntityAsync(project);
-        MudDialog.Close(DialogResult.Ok(result));
+        IEnumerable<RoleInProject> roles = await RoleInProjectRepository.GetAllAsync();
+        _employeeRole = roles.First(r => r.Name.ToLower() == "сотрудник");
+        _managerRole = roles.First(r => r.Name.ToLower() == "руководитель");
+        _managerFullName = $"{_manager.FirstName} {_manager.LastName} {_manager.Patronymic}";
     }
-    void Cancel() => MudDialog.Cancel();
-
 
     private async Task OnEmplyeeSelecting()
     {
@@ -169,17 +169,16 @@
         var result = await task;
         if (!result.Cancelled)
         {
-            if (result.Data is ICollection<Employee> employees)
+            if (result.Data is IEnumerable<Employee> employees)
             {
-                IEnumerable<RoleInProject> roles = RoleInProjectRepository.GetAlL();
-                RoleInProject employeeRole = roles.First(r => r.Name.ToLower() == "сотрудник");
+                
                 foreach (var item in employees)
                 {
                     project.EmployeesInProject.Add(new EmployeeInProject
                         {
                             Employee = item,
                             Project = project,
-                            RoleInProject = employeeRole
+                            RoleInProject = _employeeRole
                         });
                 }
             }
@@ -197,8 +196,19 @@
         if (result != null && result == true)
         {
             _employees.Remove(_employees.First(e => e.Id == employeeId));
-            // this project's instance is not in database yet
+            // this project instance is not in database yet
             project.EmployeesInProject.Remove(project.EmployeesInProject.First(ep => ep.EmployeeId == employeeId));
         }
     }
+
+    private async Task Submit()
+    {
+        project.StartDate = _projectStartDate.Value;
+        project.EndDate = _projectEndDate.Value;
+
+        var result = await ProjectRepository.AddEntityAsync(project);
+        MudDialog.Close(DialogResult.Ok(result));
+    }
+
+    void Cancel() => MudDialog.Cancel();
 }

@@ -102,7 +102,7 @@ else
         _projects = (ICollection<Project>)await ProjectsRepository.GetAllAsync();
     }
 
-    private void OnCreateProject()
+    private async void OnCreateProject()
     {
         var options = new DialogOptions
             {
@@ -112,6 +112,15 @@ else
                 FullWidth = true
             };
         var dialog = DialogService.Show<CreateProjectDialog>("Создание проекта", options);
+        using var task = dialog.Result;
+        var result = await task;
+        if (!result.Cancelled)
+        {
+            if (result.Data is Project project)
+            {
+                _projects.Add(project);
+            }
+        }
     }
 
     private async Task OnWatchProject(int projectId)
@@ -136,7 +145,7 @@ else
         }
     }
 
-    protected void OnProjectEdit(int projectId)
+    protected async Task OnProjectEdit(int projectId)
     {
         var options = new DialogOptions
             {
@@ -147,10 +156,17 @@ else
             };
         Project project = ProjectsRepository.GetById(projectId);
         DialogParameters parameters = new DialogParameters();
-        parameters.Add("project", project);
+        parameters.Add("Project", project);
         var dialog = DialogService.Show<ProjectManagementDialog>("Управление проектом", parameters, options);
-
-        _projects.Remove(project);
-        _projects.Add(project);
+        using var task = dialog.Result;
+        var result = await task;
+        if (!result.Cancelled)
+        {
+            if (result.Data is Project editedProject)
+            {
+                _projects.Remove(_projects.First(p => p.Id == projectId));
+                _projects.Add(editedProject);
+            }
+        }
     }
 }
