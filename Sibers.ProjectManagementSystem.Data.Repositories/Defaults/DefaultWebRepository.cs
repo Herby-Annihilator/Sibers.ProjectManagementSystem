@@ -6,6 +6,8 @@ using System.Linq;
 using System.Net;
 using System.Net.Http.Json;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace Sibers.ProjectManagementSystem.Data.Repositories.Defaults
@@ -13,31 +15,38 @@ namespace Sibers.ProjectManagementSystem.Data.Repositories.Defaults
     public class DefaultWebRepository<TEntity> : ICrudRepository<TEntity> where TEntity : Entity
     {
         protected HttpClient client;
+        protected JsonSerializerOptions options;
         public DefaultWebRepository(HttpClient httpClient)
         {
             client = httpClient;
+            options = new JsonSerializerOptions
+            {
+                ReferenceHandler = ReferenceHandler.Preserve,
+                PropertyNamingPolicy = null
+            };
+            
         }
         public virtual bool AutoSaveChanges { get; set; } = true;
 
         public virtual TEntity AddEntity(TEntity entity)
         {
-            var response = client.PostAsJsonAsync("", entity).Result;
+            var response = client.PostAsJsonAsync("", entity, options).Result;
             var result = response
                .EnsureSuccessStatusCode()
                .Content
-               .ReadFromJsonAsync<TEntity>()
+               .ReadFromJsonAsync<TEntity>(options)
                .Result;
             return result;
         }
 
         public virtual async Task<TEntity> AddEntityAsync(TEntity entity, CancellationToken cancellationToken = default)
         {
-            var response = await client.PostAsJsonAsync("", entity, cancellationToken)
+            var response = await client.PostAsJsonAsync("", entity, options, cancellationToken)
                 .ConfigureAwait(false);
             var result = await response
                .EnsureSuccessStatusCode()
                .Content
-               .ReadFromJsonAsync<TEntity>(cancellationToken: cancellationToken)
+               .ReadFromJsonAsync<TEntity>(options: options, cancellationToken: cancellationToken)
                .ConfigureAwait(false);
             return result;
         }
@@ -54,7 +63,7 @@ namespace Sibers.ProjectManagementSystem.Data.Repositories.Defaults
         {
             var request = new HttpRequestMessage(HttpMethod.Delete, "")
             {
-                Content = JsonContent.Create(entity)
+                Content = JsonContent.Create(entity, options: options)
             };
             var response = client.SendAsync(request).Result;
             if (response.StatusCode == HttpStatusCode.NotFound)
@@ -62,7 +71,7 @@ namespace Sibers.ProjectManagementSystem.Data.Repositories.Defaults
             var result = response
                .EnsureSuccessStatusCode()
                .Content
-               .ReadFromJsonAsync<TEntity>()
+               .ReadFromJsonAsync<TEntity>(options)
                .Result;
             return result;
         }
@@ -79,7 +88,7 @@ namespace Sibers.ProjectManagementSystem.Data.Repositories.Defaults
         {
             var request = new HttpRequestMessage(HttpMethod.Delete, "")
             {
-                Content = JsonContent.Create(entity)
+                Content = JsonContent.Create(entity, options: options)
             };
             var response = await client.SendAsync(request, cancellationToken).ConfigureAwait(false);
             if (response.StatusCode == HttpStatusCode.NotFound)
@@ -87,7 +96,7 @@ namespace Sibers.ProjectManagementSystem.Data.Repositories.Defaults
             var result = await response
                .EnsureSuccessStatusCode()
                .Content
-               .ReadFromJsonAsync<TEntity>(cancellationToken: cancellationToken)
+               .ReadFromJsonAsync<TEntity>(options: options, cancellationToken: cancellationToken)
                .ConfigureAwait(false);
             return result;
         }
@@ -110,16 +119,16 @@ namespace Sibers.ProjectManagementSystem.Data.Repositories.Defaults
             GC.SuppressFinalize(this);
         }
 
-        public virtual IEnumerable<TEntity> GetAlL() => client.GetFromJsonAsync<IEnumerable<TEntity>>("").Result;
+        public virtual IEnumerable<TEntity> GetAlL() => client.GetFromJsonAsync<IEnumerable<TEntity>>("", options).Result;
 
         public virtual async Task<IEnumerable<TEntity>> GetAllAsync(CancellationToken cancellationToken = default) =>
-            await client.GetFromJsonAsync<IEnumerable<TEntity>>("", cancellationToken)
+            await client.GetFromJsonAsync<IEnumerable<TEntity>>("", options, cancellationToken)
             .ConfigureAwait(false);
 
-        public virtual TEntity GetById(int id) => client.GetFromJsonAsync<TEntity>($"get/{id}").Result;
+        public virtual TEntity GetById(int id) => client.GetFromJsonAsync<TEntity>($"get/{id}", options).Result;
 
         public virtual async Task<TEntity> GetByIdAsync(int id, CancellationToken cancellationToken = default) =>
-            await client.GetFromJsonAsync<TEntity>($"get/{id}", cancellationToken)
+            await client.GetFromJsonAsync<TEntity>($"get/{id}", options, cancellationToken)
             .ConfigureAwait(false);
 
         public virtual bool SaveChanges()
@@ -134,23 +143,23 @@ namespace Sibers.ProjectManagementSystem.Data.Repositories.Defaults
 
         public virtual TEntity UpdateEntity(TEntity entity)
         {
-            var response = client.PutAsJsonAsync("", entity).Result;
+            var response = client.PutAsJsonAsync("", entity, options).Result;
             var result = response
                .EnsureSuccessStatusCode()
                .Content
-               .ReadFromJsonAsync<TEntity>()
+               .ReadFromJsonAsync<TEntity>(options)
                .Result;
             return result;
         }
 
         public virtual async Task<TEntity> UpdateEntityAsync(TEntity entity, CancellationToken cancellationToken = default)
         {
-            var response = await client.PutAsJsonAsync("", entity, cancellationToken)
+            var response = await client.PutAsJsonAsync("", entity, options, cancellationToken)
                 .ConfigureAwait(false);
             var result = await response
                .EnsureSuccessStatusCode()
                .Content
-               .ReadFromJsonAsync<TEntity>(cancellationToken: cancellationToken)
+               .ReadFromJsonAsync<TEntity>(options: options, cancellationToken: cancellationToken)
                .ConfigureAwait(false);
             return result;
         }

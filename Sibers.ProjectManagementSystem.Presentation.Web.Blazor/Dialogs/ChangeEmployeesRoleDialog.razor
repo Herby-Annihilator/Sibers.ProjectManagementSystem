@@ -8,10 +8,13 @@
         <MudDivider/>
         <MudText Class="mt-5" GutterBottom="true" Typo="Typo.h6">ФИО сотрудника</MudText>
         <MudText>@Employee.FirstName @Employee.LastName @Employee.Patronymic</MudText>
-        <MudSelect SelectedValues="_selectedRoles" Label="Роль на проекте" AnchorOrigin="Origin.BottomCenter">
-            @foreach (var item in _rolesInProject)
+        <MudSelect @bind-Value="@_selectedRole" ToStringFunc="@converter" Label="Роль на проекте" AnchorOrigin="Origin.BottomCenter">
+            @if (_rolesInProject != null)
             {
-                <MudSelectItem Value="@item.Name"/>
+                @foreach (var item in _rolesInProject)
+                {
+                    <MudSelectItem Value="@item"/>
+                }
             }
         </MudSelect>
     </DialogContent>
@@ -34,8 +37,7 @@
 
     private IEnumerable<RoleInProject> _rolesInProject;
 
-    // If Multiselect is false (default) contains only one value. From https://mudblazor.com/api/select#properties
-    private List<RoleInProject> _selectedRoles = new List<RoleInProject>();
+    private RoleInProject _selectedRole = new RoleInProject();
     // This property dialog will get from parameters
     [Parameter]
     public Project Project { get; set; }
@@ -45,8 +47,9 @@
 
     void Submit()
     {
-        RoleInProject selectedRole = _selectedRoles[0];
-        MudDialog.Close(DialogResult.Ok(selectedRole));
+        MudDialog.Close(DialogResult.Ok(_selectedRole));
     }
     void Cancel() => MudDialog.Cancel();
+
+    Func<RoleInProject, string> converter = role => role.Name;
 }

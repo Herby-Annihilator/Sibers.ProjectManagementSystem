@@ -6,6 +6,7 @@
 @using Sibers.ProjectManagementSystem.Presentation.Web.Blazor.Infrastructure.Commands.Base
 
 @inject IDialogService DialogService
+@inject ISnackbar Snackbar
 @inject ICrudRepository<Employee> EmployeeRepository
 
 <PageTitle>Все сотрудники компании</PageTitle>
@@ -111,11 +112,15 @@ else
         var result = await task;
         if (!result.Cancelled)
         {
-            if (result.Data is Employee employee)
+            if (result.Data is bool ok)
             {
-                await EmployeeRepository.AddEntityAsync(employee);
-                _employeesList.Add(employee);
-
+                _employeesList.Clear();
+                ICollection<Employee> employees = (ICollection<Employee>)await EmployeeRepository.GetAllAsync();
+                foreach (var item in employees)
+                {
+                    _employeesList.Add(item);
+                }
+                Snackbar.Add("Информация обновлена", Severity.Info);
             }
         }
     }
@@ -131,7 +136,15 @@ else
         if (result != null && result == true)
         {
             _employeesList.Remove(employee);
-            await EmployeeRepository.DeleteEntityAsync(employee.Id);
+            var entity = await EmployeeRepository.DeleteEntityAsync(employee.Id);
+            if (entity == default)
+            {
+                Snackbar.Add("Сотрудник не был удален", Severity.Error);
+            }
+            else
+            {
+                 Snackbar.Add("Сотрудник был удален", Severity.Success);
+            }
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿@using Sibers.ProjectManagementSystem.Data.Entities
 @using Sibers.ProjectManagementSystem.Data.Repositories.Base
 @inject IDialogService DialogService
+@inject ISnackbar Snackbar
 @inject ICrudRepository<Project> ProjectRepository
 @inject ICrudRepository<Employee> EmployeeRepository
 @inject ICrudRepository<RoleInProject> RoleInProjectRepository
@@ -80,7 +81,6 @@
     [CascadingParameter]
     MudDialogInstance MudDialog { get; set; }
 
-    private bool Loading { get; set; }
     private RoleInProject _employeeRole;
     private RoleInProject _managerRole;
 
@@ -103,7 +103,7 @@
         DialogParameters parameters = new DialogParameters();
         parameters.Add("Project", project);
         parameters.Add("Employee", _employee);
-        var dialog = DialogService.Show<ChangeEmployeesRoleDialog>("Изменение роли сотрудника", options);
+        var dialog = DialogService.Show<ChangeEmployeesRoleDialog>("Изменение роли сотрудника", parameters, options);
         using var task = dialog.Result;
         var result = await task;
         if (!result.Cancelled)
@@ -117,6 +117,7 @@
                     Employee = _employee,
                     RoleInProject = role
                 });
+                Snackbar.Add("Роль изменена", Severity.Success);
             }
         }
     }
@@ -149,7 +150,16 @@
                         RoleInProject = _employeeRole
                     });
                 }
+                Snackbar.Add("Для сотрудника были выбраны проекты", Severity.Success);
             }
+            else
+            {
+                Snackbar.Add("result.Data is not an ICollection<Project>", Severity.Error);
+            }
+        }
+        else
+        {
+            Snackbar.Add("Проекты не выбраны", Severity.Warning);
         }
     }
 
@@ -164,7 +174,9 @@
         if (result != null && result == true)
         {
             // this employee instance is not in database yet
-            _employee.EmployeesInProject.Remove(_employee.EmployeesInProject.First(ep => ep.Project.Id == projectId));
+            var employeeInProject = _employee.EmployeesInProject.First(ep => ep.Project.Id == projectId);
+            _employee.EmployeesInProject.Remove(employeeInProject);
+            Snackbar.Add($"Сотрудник снят с проекта {employeeInProject.Project?.Name}", Severity.Success);
         }
     }
 
@@ -182,8 +194,16 @@
     {
         var result = await EmployeeRepository.AddEntityAsync(_employee);
         if (result == default)
+        {
+            Snackbar.Add("Сотрудник не был создан", Severity.Error);
             MudDialog.Close(DialogResult.Ok(false));
-        MudDialog.Close(DialogResult.Ok(true));
+        }
+        else
+        {
+            Snackbar.Add("Сотрудник создан", Severity.Success);
+            MudDialog.Close(DialogResult.Ok(true));
+        }
+        
     }
     void Cancel() => MudDialog.Cancel();
 }
