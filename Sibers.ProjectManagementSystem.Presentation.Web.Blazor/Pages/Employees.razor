@@ -1,8 +1,12 @@
 ﻿@page "/employees"
 @using Sibers.ProjectManagementSystem.Data.Entities
+@using Sibers.ProjectManagementSystem.Data.Repositories.Base
 @using Sibers.ProjectManagementSystem.Presentation.Web.Blazor.Dialogs
+@using Sibers.ProjectManagementSystem.Presentation.Web.Blazor.Infrastructure.Commands
+@using Sibers.ProjectManagementSystem.Presentation.Web.Blazor.Infrastructure.Commands.Base
 
 @inject IDialogService DialogService
+@inject ICrudRepository<Employee> EmployeeRepository
 
 <PageTitle>Все сотрудники компании</PageTitle>
 <MudFab Style="position:fixed; bottom:10px; right:10px;" Color="Color.Success"
@@ -53,11 +57,11 @@ else
         <MudTd DataLabel="Patronymic">@context.Patronymic</MudTd>
         <MudTd DataLabel="Email">@context.Email</MudTd>
         <MudTd>
-            <MudIconButton Color="Color.Info" Variant="Variant.Filled" Icon="@Icons.Filled.RemoveRedEye" @onclick="OnEmployeeWatch">
+            <MudIconButton Color="Color.Info" Variant="Variant.Filled" Icon="@Icons.Filled.RemoveRedEye" @onclick="@(() => OnEmployeeWatch(context))">
             </MudIconButton>
             <MudIconButton Color="Color.Success" Variant="Variant.Filled" Icon="@Icons.Filled.Edit" @onclick="OnEmployeeEdit">
             </MudIconButton>
-            <MudIconButton Color="Color.Error" Variant="Variant.Filled" Icon="@Icons.Filled.Delete" @onclick="@(() => OnEmployeeDelete(context.Id))">
+            <MudIconButton Color="Color.Error" Variant="Variant.Filled" Icon="@Icons.Filled.Delete" @onclick="@(() => OnEmployeeDelete(context))">
             </MudIconButton>
         </MudTd>
     </RowTemplate>
@@ -68,11 +72,11 @@ else
 }
 
 @code {
-    private IEnumerable<Employee> _employeesList;
+    private ICollection<Employee> _employeesList;
 
     protected override async Task OnInitializedAsync()
     {
-        await GetEmployees();
+        _employeesList = (ICollection<Employee>)await EmployeeRepository.GetAllAsync(); 
     }
 
     private void OnEmployeeEdit()
@@ -87,19 +91,13 @@ else
         var dialog = DialogService.Show<EmployeeManagementDialog>("Управление сотрудником", options);
     }
 
-    private void OnEmployeeWatch()
+    private void OnEmployeeWatch(Employee employee)
     {
-        DialogOptions options = new DialogOptions
-            {
-                CloseButton = true,
-                CloseOnEscapeKey = true,
-                MaxWidth = MaxWidth.Medium,
-                FullWidth = true
-            };
-        var dialog = DialogService.Show<WatchEmployeeDialog>("Просмотр сотрудника", options);
+        ICommand watchCommand = new ShowWatchEmployeeDialogCommand(DialogService);
+        watchCommand.Execute(employee);
     }
 
-    private void OnEmployeeCreate()
+    private async Task OnEmployeeCreate()
     {
         DialogOptions options = new DialogOptions
             {
@@ -109,38 +107,31 @@ else
                 FullWidth = true
             };
         var dialog = DialogService.Show<CreateEmployeeDialog>("Создание сотрудника", options);
+        using var task = dialog.Result;
+        var result = await task;
+        if (!result.Cancelled)
+        {
+            if (result.Data is Employee employee)
+            {
+                await EmployeeRepository.AddEntityAsync(employee);
+                _employeesList.Add(employee);
+
+            }
+        }
     }
 
-    private async Task OnEmployeeDelete(int employeeId)
+    private async Task OnEmployeeDelete(Employee employee)
     {
         bool? result = await DialogService.ShowMessageBox(
-            title: $"Удаление сотрудника {employeeId}",
+            title: $"Удаление сотрудника '{employee.FirstName} {employee.LastName} {employee.Patronymic}'",
             markupMessage: new MarkupString("Вы действительно хотите удалить сотрудника? Действие невозможно будет отменить"),
             yesText: "Удалить",
             cancelText: "Отмена"
         );
-    }
-
-    private Task GetEmployees()
-    {
-        return Task.Factory.StartNew(() =>
+        if (result != null && result == true)
         {
-            int employeesCount = 33;
-            int id;
-            Employee[] employees = new Employee[employeesCount];
-            for (int i = 0; i < employeesCount; i++)
-            {
-                id = i + 1;
-                employees[i] = new Employee
-                {
-                    Id = id,
-                    FirstName = $"EmployeeFirstName_{id}",
-                    LastName = $"EmployeeLastName_{id}",
-                    Patronymic = $"EmployeePatronymic_{id}",
-                    Email = $"employee_{id}_@gmail.com"
-                };
-            }
-            _employeesList = employees;
-        });
+            _employeesList.Remove(employee);
+            await EmployeeRepository.DeleteEntityAsync(employee.Id);
+        }
     }
 }

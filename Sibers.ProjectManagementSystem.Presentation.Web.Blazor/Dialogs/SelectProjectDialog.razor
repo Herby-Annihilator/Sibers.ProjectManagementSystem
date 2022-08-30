@@ -1,4 +1,7 @@
 ﻿@using Sibers.ProjectManagementSystem.Data.Entities
+@using Sibers.ProjectManagementSystem.Data.Repositories.Base
+@inject ICrudRepository<Project> ProjectRepository
+
 <MudDialog>
     <DialogContent>
         <MudContainer>
@@ -8,8 +11,16 @@
             }
             else
             {
+                @if (Multiselection == false)
+                {
+                    <MudText GutterBottom="true" Typo="Typo.h4">
+                        Выбранный проект
+                    </MudText>
+                    <MudText GutterBottom="true">@_selectedProject?.Name</MudText>
+                }
                 <MudTable Style="height:stretch;" Items="_projectsList" FixedHeader="true" FixedFooter="true" 
-                    Hover="true" SortLabel="Sort by" MultiSelection="true" @bind-SelectedItems="_selectedProjects">
+                    Hover="true" SortLabel="Sort by" MultiSelection="@Multiselection" 
+                    @bind-SelectedItems="_selectedProjects" @bind-SelectedItem="_selectedProject">
                 <HeaderContent>
                     <MudTh>
                         <MudTableSortLabel SortBy="new Func<Project, object>(e => e.Id)">
@@ -64,7 +75,7 @@
         </MudContainer>
     </DialogContent>
     <DialogActions>
-        <MudButton OnClick="Ok">Выбрать</MudButton>
+        <MudButton OnClick="Submit">Выбрать</MudButton>
     </DialogActions>
 </MudDialog>
 
@@ -72,38 +83,39 @@
 @code {
     [CascadingParameter]
     private MudDialogInstance MudDialog { get; set; }
-    private IEnumerable<Project> _projectsList;
+    private ICollection<Project> _projectsList;
+    private HashSet<Project> _selectedProjects = new HashSet<Project>();
+    /// <summary>
+    /// Indicates the need for multiple project selection
+    /// </summary>
+    [Parameter]
+    public bool Multiselection { get; set; }
+    /// <summary>
+    /// Projects that need to be excluded from the final sample
+    /// </summary>
+    [Parameter]
+    public ICollection<Project> ExcludedProjects { get; set; }
+
+    private Project _selectedProject;
 
     protected override async Task OnInitializedAsync()
     {
-        await GetEmployees();
-    }
-    private HashSet<Project> _selectedProjects = new HashSet<Project>();
-
-    private Task GetEmployees()
-    {
-        return Task.Factory.StartNew(() =>
+        _projectsList = (ICollection<Project>)await ProjectRepository.GetAllAsync();
+        foreach (var item in ExcludedProjects)
         {
-            int employeesCount = 33;
-            int id;
-            Project[] projects = new Project[employeesCount];
-            for (int i = 0; i < employeesCount; i++)
-            {
-                id = i + 1;
-                projects[i] = new Project
-                {
-                    Id = id,
-                    Name = $"Project_{id}",
-                    StartDate = DateTime.Now,
-                    EndDate = DateTime.Now,
-                    Priority = id,
-                    NameOfCustomerCompany = $"Customer_{id}",
-                    NameOfContractorCompany = $"Contractor_{id}",
-                };
-            }
-            _projectsList = projects;
-        });
+            _projectsList.Remove(item);
+        }
     }
 
-    private void Ok() => MudDialog.Close(DialogResult.Ok(true));
+    private void Submit()
+    {
+        if (Multiselection)
+        {
+            MudDialog.Close(DialogResult.Ok(_selectedProjects));
+        }
+        else
+        {
+            MudDialog.Close(DialogResult.Ok(_selectedProject));
+        }
+    }
 }

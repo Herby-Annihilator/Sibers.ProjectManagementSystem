@@ -1,5 +1,10 @@
 ﻿@using Sibers.ProjectManagementSystem.Data.Entities
+@using Sibers.ProjectManagementSystem.Data.Repositories.Base
 @inject IDialogService DialogService
+@inject ICrudRepository<Project> ProjectRepository
+@inject ICrudRepository<Employee> EmployeeRepository
+@inject ICrudRepository<RoleInProject> RoleInProjectRepository
+
 <MudDialog>
     <DialogContent>
         <MudContainer>
@@ -21,7 +26,7 @@
                             RequiredError="Это обязательное поле!"/>
                         <MudDivider/>
                         <MudText Typo="Typo.h5" GutterBottom="true" Class="mt-5">
-                                Задействован на проектах
+                            Задействован на проектах
                         </MudText>
                         <MudButton Variant="Variant.Filled" Color="Color.Success" Class="mt-3 mb-3" @onclick="OnProjectSelecting">
                             Добавить на проект
@@ -48,10 +53,10 @@
                                     <MudTd DataLabel="Название проекта">@ep.Project.Name</MudTd>
                                     <MudTd DataLabel="Роль на проекте">@ep.RoleInProject.Name</MudTd>
                                     <MudTd DataLabel="Действие">
-                                        <MudButton Color="Color.Tertiary" Variant="Variant.Filled" @onclick="OnChangeEmployeesRole">
+                                        <MudButton Color="Color.Tertiary" Variant="Variant.Filled" @onclick="@(() => OnChangeEmployeesRole(ep.Project))">
                                             Изменить роль
                                         </MudButton>
-                                        <MudButton Color="Color.Error" Variant="Variant.Filled" @onclick="@(() => OnEmployeeDeleting(@_employee.Id))">
+                                        <MudButton Color="Color.Error" Variant="Variant.Filled" @onclick="@(() => OnRemovingEmployeeFromProject(@ep.Project.Id))">
                                             Снять с проекта
                                         </MudButton>
                                     </MudTd>
@@ -76,32 +81,79 @@
     MudDialogInstance MudDialog { get; set; }
 
     private bool Loading { get; set; }
+    private RoleInProject _employeeRole;
+    private RoleInProject _managerRole;
 
-    private void OnChangeEmployeesRole()
+    protected override async Task OnInitializedAsync()
     {
-         DialogOptions options = new DialogOptions
+        IEnumerable<RoleInProject> roles = await RoleInProjectRepository.GetAllAsync();
+        _employeeRole = roles.FirstOrDefault(r => r.Name.ToLower() == "сотрудник");
+        _managerRole = roles.FirstOrDefault(r => r.Name.ToLower() == "руководитель");
+    }
+
+    private async Task OnChangeEmployeesRole(Project project)
+    {
+        DialogOptions options = new DialogOptions
             {
                 CloseButton = true,
                 CloseOnEscapeKey = true,
                 MaxWidth = MaxWidth.Medium,
                 FullWidth = true
             };
+        DialogParameters parameters = new DialogParameters();
+        parameters.Add("Project", project);
+        parameters.Add("Employee", _employee);
         var dialog = DialogService.Show<ChangeEmployeesRoleDialog>("Изменение роли сотрудника", options);
+        using var task = dialog.Result;
+        var result = await task;
+        if (!result.Cancelled)
+        {
+            if (result.Data is RoleInProject role)
+            {
+                _employee.EmployeesInProject.Remove(_employee.EmployeesInProject.First(ep => ep.Employee.Id == _employee.Id && ep.Project.Id == project.Id));
+                _employee.EmployeesInProject.Add(new EmployeeInProject
+                {
+                    Project = project,
+                    Employee = _employee,
+                    RoleInProject = role
+                });
+            }
+        }
     }
 
-    private void OnProjectSelecting()
+    private async void OnProjectSelecting()
     {
-         DialogOptions options = new DialogOptions
+        DialogOptions options = new DialogOptions
             {
                 CloseButton = true,
                 CloseOnEscapeKey = true,
                 MaxWidth = MaxWidth.Large,
                 FullWidth = true
             };
-        var dialog = DialogService.Show<SelectProjectDialog>("Выбор проектов для сотрудника", options);
+        DialogParameters parameters = new DialogParameters();
+        parameters.Add("Multiselection", true);
+        parameters.Add("ExcludedProjects", new List<Project>());
+        var dialog = DialogService.Show<SelectProjectDialog>("Выбор проектов для сотрудника", parameters, options);
+        var task = dialog.Result;
+        var result = await task;
+        if (!result.Cancelled)
+        {
+            if (result.Data is ICollection<Project> projects)
+            {
+                foreach (var item in projects)
+                {
+                    _employee.EmployeesInProject.Add(new EmployeeInProject
+                    {
+                        Employee = _employee,
+                        Project = item,
+                        RoleInProject = _employeeRole
+                    });
+                }
+            }
+        }
     }
 
-    private async Task OnEmployeeDeleting(int employeeId)
+    private async Task OnRemovingEmployeeFromProject(int projectId)
     {
         bool? result = await DialogService.ShowMessageBox(
             title: "Снять сотрудника",
@@ -109,42 +161,29 @@
             yesText: "Снять",
             cancelText: "Отмена"
         );
+        if (result != null && result == true)
+        {
+            // this employee instance is not in database yet
+            _employee.EmployeesInProject.Remove(_employee.EmployeesInProject.First(ep => ep.Project.Id == projectId));
+        }
     }
 
     private Employee _employee = new Employee
         {
-            FirstName = "Иванов",
-            LastName = "Петр",
-            Patronymic = "Сидорович",
-            Email = "ivanov_ps@mail.ru",
-            Id = 15,
+            FirstName = "",
+            LastName = "",
+            Patronymic = "",
+            Email = "",
+            Id = 0,
             EmployeesInProject = new List<EmployeeInProject>()
-            {
-                new EmployeeInProject()
-                {
-                    Project = new Project
-                    {
-                        Name = "Какой-то проект"
-                    },
-                    RoleInProject = new RoleInProject
-                    {
-                        Name = "Руководитель"
-                    }
-                },
-                new EmployeeInProject()
-                {
-                    Project = new Project
-                    {
-                        Name = "Другой проект"
-                    },
-                    RoleInProject = new RoleInProject
-                    {
-                        Name = "Сотрудник"
-                    }
-                }
-            },
         };
 
-    void Submit() => MudDialog.Close(DialogResult.Ok(true));
+    async Task Submit()
+    {
+        var result = await EmployeeRepository.AddEntityAsync(_employee);
+        if (result == default)
+            MudDialog.Close(DialogResult.Ok(false));
+        MudDialog.Close(DialogResult.Ok(true));
+    }
     void Cancel() => MudDialog.Cancel();
 }

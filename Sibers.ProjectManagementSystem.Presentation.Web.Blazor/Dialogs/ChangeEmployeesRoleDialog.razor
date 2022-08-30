@@ -1,13 +1,14 @@
 ﻿@using Sibers.ProjectManagementSystem.Data.Entities
-
+@using Sibers.ProjectManagementSystem.Data.Repositories.Base
+@inject ICrudRepository<RoleInProject> RoleInProjectRepository
 
 <MudDialog>
     <DialogContent>
-        <MudText GutterBottom="true" Typo="Typo.h4" Align="Align.Center">@_project.Name</MudText>
+        <MudText GutterBottom="true" Typo="Typo.h4" Align="Align.Center">@Project.Name</MudText>
         <MudDivider/>
         <MudText Class="mt-5" GutterBottom="true" Typo="Typo.h6">ФИО сотрудника</MudText>
-        <MudText>@_employee.FirstName @_employee.LastName @_employee.Patronymic</MudText>
-        <MudSelect T="string" Label="Роль на проекте" AnchorOrigin="Origin.BottomCenter">
+        <MudText>@Employee.FirstName @Employee.LastName @Employee.Patronymic</MudText>
+        <MudSelect SelectedValues="_selectedRoles" Label="Роль на проекте" AnchorOrigin="Origin.BottomCenter">
             @foreach (var item in _rolesInProject)
             {
                 <MudSelectItem Value="@item.Name"/>
@@ -24,32 +25,28 @@
 @code {
     [CascadingParameter] MudDialogInstance MudDialog { get; set; }
 
-    private List<RoleInProject> _rolesInProject = new List<RoleInProject>
+    protected override async Task OnInitializedAsync()
     {
-        new RoleInProject
-        {
-            Name = "Руководитель",
-            Id = 1
-        },
-        new RoleInProject
-        {
-            Name = "Сотрудник",
-            Id = 2
-        }
-    };
+        _rolesInProject = await RoleInProjectRepository.GetAllAsync();
+        if (_rolesInProject == null)
+            _rolesInProject = new List<RoleInProject>();
+    }
 
-    private Project _project = new Project
-        {
-            Name = "Проект какой-то",
-        };
-    private Employee _employee = new Employee
-        {
-            FirstName = "Иванов",
-            LastName = "Иван",
-            Patronymic = "Иванович",
-            Email = "ivanov_pes@yandex.ru"
-        };
+    private IEnumerable<RoleInProject> _rolesInProject;
 
-    void Submit() => MudDialog.Close(DialogResult.Ok(true));
+    // If Multiselect is false (default) contains only one value. From https://mudblazor.com/api/select#properties
+    private List<RoleInProject> _selectedRoles = new List<RoleInProject>();
+    // This property dialog will get from parameters
+    [Parameter]
+    public Project Project { get; set; }
+    // This property dialog will get from parameters
+    [Parameter]
+    public Employee Employee { get; set; }
+
+    void Submit()
+    {
+        RoleInProject selectedRole = _selectedRoles[0];
+        MudDialog.Close(DialogResult.Ok(selectedRole));
+    }
     void Cancel() => MudDialog.Cancel();
 }
