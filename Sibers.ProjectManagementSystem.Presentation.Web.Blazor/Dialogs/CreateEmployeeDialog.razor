@@ -51,8 +51,8 @@
                                     </MudTh>
                                 </HeaderContent>
                                 <RowTemplate Context="ep">
-                                    <MudTd DataLabel="Название проекта">@ep.Project.Name</MudTd>
-                                    <MudTd DataLabel="Роль на проекте">@ep.RoleInProject.Name</MudTd>
+                                    <MudTd DataLabel="Название проекта">@ep.Project?.Name</MudTd>
+                                    <MudTd DataLabel="Роль на проекте">@ep.RoleInProject?.Name</MudTd>
                                     <MudTd DataLabel="Действие">
                                         <MudButton Color="Color.Tertiary" Variant="Variant.Filled" @onclick="@(() => OnChangeEmployeesRole(ep.Project))">
                                             Изменить роль
@@ -133,7 +133,7 @@
             };
         DialogParameters parameters = new DialogParameters();
         parameters.Add("Multiselection", true);
-        parameters.Add("ExcludedProjects", new List<Project>());
+        parameters.Add("ExcludedProjects", GetExludedProjects());
         var dialog = DialogService.Show<SelectProjectDialog>("Выбор проектов для сотрудника", parameters, options);
         var task = dialog.Result;
         var result = await task;
@@ -161,6 +161,16 @@
         {
             Snackbar.Add("Проекты не выбраны", Severity.Warning);
         }
+    }
+
+    private List<Project> GetExludedProjects()
+    {
+        List<Project> projects = new List<Project>();
+        foreach (var item in _employee.EmployeesInProject)
+        {
+            projects.Add(item.Project);
+        }
+        return projects;
     }
 
     private async Task OnRemovingEmployeeFromProject(int projectId)

@@ -11,6 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Sibers.ProjectManagementSystem.Data.DbContexts\Sibers.ProjectManagementSystem.Data.DbContexts.csproj" />
     <ProjectReference Include="..\Sibers.ProjectManagementSystem.Data.Entities\Sibers.ProjectManagementSystem.Data.Entities.csproj" />
   </ItemGroup>
 

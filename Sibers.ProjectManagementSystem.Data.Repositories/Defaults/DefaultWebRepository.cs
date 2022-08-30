@@ -19,10 +19,10 @@ namespace Sibers.ProjectManagementSystem.Data.Repositories.Defaults
         public DefaultWebRepository(HttpClient httpClient)
         {
             client = httpClient;
-            options = new JsonSerializerOptions
+            options = new JsonSerializerOptions(JsonSerializerDefaults.Web)
             {
                 ReferenceHandler = ReferenceHandler.Preserve,
-                PropertyNamingPolicy = null
+                //PropertyNamingPolicy = null
             };
             
         }

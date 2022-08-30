@@ -1,10 +1,15 @@
+using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.EntityFrameworkCore;
 using Sibers.ProjectManagementSystem.Data.DbContexts;
 using Sibers.ProjectManagementSystem.Data.DbContexts.Extensions;
+using Sibers.ProjectManagementSystem.Data.Entities;
+using Sibers.ProjectManagementSystem.Data.Repositories;
 using Sibers.ProjectManagementSystem.Data.Repositories.Base;
 using Sibers.ProjectManagementSystem.Data.Repositories.Defaults;
 using Sibers.ProjectManagementSystem.Data.UnitsOfWork.Base;
 using Sibers.ProjectManagementSystem.Data.UnitsOfWork.Defaults;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 IConfiguration configuration = builder.Configuration;
@@ -17,10 +22,22 @@ builder.Services.AddDbContext<ProjectManagementSystemDbContext>(optionsBuilder =
     optionsBuilder.UseSqlServer(configuration.GetConnectionString("MSSQL"),
         sql => sql.MigrationsAssembly(migrationAssembly));
 });
-builder.Services.AddScoped(typeof(ICrudRepository<>), typeof(DefaultCrudRepository<>));
+
+builder.Services.AddScoped<ICrudRepository<Employee>, EmployeeRepository>();
+builder.Services.AddScoped<ICrudRepository<Project>, ProjectRepository>();
+builder.Services.AddScoped<ICrudRepository<RoleInProject>, RoleInProjectRepository>();
 builder.Services.AddScoped<IUnitOfWork<ProjectManagementSystemDbContext>, UnitOfWork<ProjectManagementSystemDbContext>>();
 
-builder.Services.AddControllers();
+builder.Services.AddControllers(options =>
+{
+    options.OutputFormatters.RemoveType<SystemTextJsonOutputFormatter>();
+    options.OutputFormatters.Add(new SystemTextJsonOutputFormatter(
+        new JsonSerializerOptions(JsonSerializerDefaults.Web)
+        {
+            ReferenceHandler = ReferenceHandler.Preserve,
+            //PropertyNamingPolicy = null    // prevent camel casing of Json
+        }));
+});
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

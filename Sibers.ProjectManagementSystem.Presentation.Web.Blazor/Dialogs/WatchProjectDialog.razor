@@ -2,6 +2,8 @@
 @using Sibers.ProjectManagementSystem.Data.Repositories.Base
 @inject IDialogService DialogService
 @inject ICrudRepository<Project> ProjectRepository
+@inject ICrudRepository<Employee> EmployeeRepository
+@inject ICrudRepository<RoleInProject> RoleInProjectRepository
 
 <MudDialog DisableSidePadding="true">
     <DialogContent>
@@ -34,7 +36,11 @@
                 </MudGrid>
                 <MudText GutterBottom="true" Typo="Typo.h5" Class="mt-5">Руководитель</MudText>
                 <MudText>
-                    @_managerFullName <MudIconButton Color="Color.Dark" Variant="Variant.Text" Icon="@Icons.Filled.RemoveRedEye" @onclick="@(() => OnEmployeeWatch(_manager.Id))"/>
+                    @_managerFullName 
+                    @if (_manager != null && _manager.Id != 0)
+                    {
+                        <MudIconButton Color="Color.Dark" Variant="Variant.Text" Icon="@Icons.Filled.RemoveRedEye" @onclick="@(() => OnEmployeeWatch(_manager.Id))"/>
+                    }     
                 </MudText>
                 
                 <MudDivider Class="mb-5"/>
@@ -99,7 +105,7 @@
 
     private string DateFormat(DateTime date) => $"{date.Day}.{date.Month}.{date.Year}";
 
-    private IEnumerable<Employee> _employees;
+    private ICollection<Employee> _employees = new List<Employee>();
     private Employee _manager = new Employee()
         {
             FirstName = "Иванов",
@@ -113,6 +119,9 @@
 
     private DateTime? _projectStartDate;
     private DateTime? _projectEndDate;
+
+    private RoleInProject _employeeRole;
+    private RoleInProject _managerRole;
 
     private void OnEmployeeWatch(int employeeId)
     {
@@ -130,33 +139,33 @@
 
     protected override async Task OnInitializedAsync()
     {
-        _managerFullName = $"{_manager.FirstName} {_manager.LastName} {_manager.Patronymic}";
         await GetEmployees();
+        _managerFullName = $"{_manager.FirstName} {_manager.LastName} {_manager.Patronymic}";
     }
 
     void Ok() => MudDialog.Close(DialogResult.Ok(true));
     void Cancel() => MudDialog.Cancel();
 
-    private Task GetEmployees()
+    private async Task GetEmployees()
     {
-        return Task.Factory.StartNew(() =>
+        IEnumerable<RoleInProject> roles = await RoleInProjectRepository.GetAllAsync();
+        _employeeRole = roles.First(r => r.Name.ToLower() == "сотрудник");
+        _managerRole = roles.First(r => r.Name.ToLower() == "руководитель");
+        Employee employee;
+        if (Project.EmployeesInProject != null)
         {
-            int employeesCount = 33;
-            int id;
-            Employee[] employees = new Employee[employeesCount];
-            for (int i = 0; i < employeesCount; i++)
+            foreach (var item in Project.EmployeesInProject)
             {
-                id = i + 1;
-                employees[i] = new Employee
+                employee = await EmployeeRepository.GetByIdAsync(item.EmployeeId);
+                if (!_employees.Contains(employee))
                 {
-                    Id = id,
-                    FirstName = $"EmployeeFirstName_{id}",
-                    LastName = $"EmployeeLastName_{id}",
-                    Patronymic = $"EmployeePatronymic_{id}",
-                    Email = $"employee_{id}_@gmail.com"
-                };
+                    if (employee.EmployeesInProject.FirstOrDefault(ep => ep.ProjectId == Project.Id && ep.RoleInProjectId == _managerRole.Id) != null)
+                    {
+                        _manager = employee;
+                    }
+                    _employees.Add(employee);
+                }
             }
-            _employees = employees;
-        });
+        }
     }
 }
