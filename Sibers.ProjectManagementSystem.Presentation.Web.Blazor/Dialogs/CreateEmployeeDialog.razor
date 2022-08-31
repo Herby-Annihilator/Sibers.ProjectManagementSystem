@@ -135,7 +135,7 @@
         parameters.Add("Multiselection", true);
         parameters.Add("ExcludedProjects", GetExludedProjects());
         var dialog = DialogService.Show<SelectProjectDialog>("Выбор проектов для сотрудника", parameters, options);
-        var task = dialog.Result;
+        using var task = dialog.Result;
         var result = await task;
         if (!result.Cancelled)
         {

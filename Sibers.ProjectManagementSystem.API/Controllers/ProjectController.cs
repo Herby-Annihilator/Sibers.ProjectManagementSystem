@@ -13,6 +13,7 @@ namespace Sibers.ProjectManagementSystem.API.Controllers
     {
         public ProjectController(IUnitOfWork<ProjectManagementSystemDbContext> context) : base(context)
         {
+            HasCustomRepository = true;
         }
     }
 }

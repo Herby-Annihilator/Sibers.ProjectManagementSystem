@@ -22,7 +22,8 @@ namespace Sibers.ProjectManagementSystem.Data.Repositories.Defaults
             options = new JsonSerializerOptions(JsonSerializerDefaults.Web)
             {
                 ReferenceHandler = ReferenceHandler.Preserve,
-                //PropertyNamingPolicy = null
+                //PropertyNameCaseInsensitive = true,
+                PropertyNamingPolicy = null
             };
             
         }
@@ -41,6 +42,8 @@ namespace Sibers.ProjectManagementSystem.Data.Repositories.Defaults
 
         public virtual async Task<TEntity> AddEntityAsync(TEntity entity, CancellationToken cancellationToken = default)
         {
+            //string text = JsonSerializer.Serialize(entity, typeof(TEntity), options);
+            //File.WriteAllText(@"C:\Users\Rukin\json.txt", text);
             var response = await client.PostAsJsonAsync("", entity, options, cancellationToken)
                 .ConfigureAwait(false);
             var result = await response
@@ -125,7 +128,7 @@ namespace Sibers.ProjectManagementSystem.Data.Repositories.Defaults
             await client.GetFromJsonAsync<IEnumerable<TEntity>>("", options, cancellationToken)
             .ConfigureAwait(false);
 
-        public virtual TEntity GetById(int id) => client.GetFromJsonAsync<TEntity>($"get/{id}", options).Result;
+        public virtual TEntity GetById(int id) => client.GetFromJsonAsync<TEntity>($"get /{id}", options).Result;
 
         public virtual async Task<TEntity> GetByIdAsync(int id, CancellationToken cancellationToken = default) =>
             await client.GetFromJsonAsync<TEntity>($"get/{id}", options, cancellationToken)

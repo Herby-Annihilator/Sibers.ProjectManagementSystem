@@ -27,6 +27,6 @@ namespace Sibers.ProjectManagementSystem.Data.Entities
         [MaxLength(512)]
         public string NameOfContractorCompany { get; set; } = "";
 
-        public ICollection<EmployeeInProject>? EmployeesInProject { get; set; }
+        public ICollection<EmployeeInProject>? EmployeesInProject { get; set; } = new List<EmployeeInProject>();
     }
 }

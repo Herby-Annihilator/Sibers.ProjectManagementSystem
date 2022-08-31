@@ -28,15 +28,10 @@ builder.Services.AddScoped<ICrudRepository<Project>, ProjectRepository>();
 builder.Services.AddScoped<ICrudRepository<RoleInProject>, RoleInProjectRepository>();
 builder.Services.AddScoped<IUnitOfWork<ProjectManagementSystemDbContext>, UnitOfWork<ProjectManagementSystemDbContext>>();
 
-builder.Services.AddControllers(options =>
+builder.Services.AddControllers().AddJsonOptions(options =>
 {
-    options.OutputFormatters.RemoveType<SystemTextJsonOutputFormatter>();
-    options.OutputFormatters.Add(new SystemTextJsonOutputFormatter(
-        new JsonSerializerOptions(JsonSerializerDefaults.Web)
-        {
-            ReferenceHandler = ReferenceHandler.Preserve,
-            //PropertyNamingPolicy = null    // prevent camel casing of Json
-        }));
+    options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve;
+    options.JsonSerializerOptions.PropertyNamingPolicy = null;
 });
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

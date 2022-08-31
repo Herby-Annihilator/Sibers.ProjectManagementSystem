@@ -51,7 +51,6 @@ namespace Sibers.ProjectManagementSystem.Data.DbContexts.Extensions
                 {
                     new Project
                         {
-                            //Id = 1,
                             Name = "Test",
                             NameOfCustomerCompany = "Sibers",
                             NameOfContractorCompany = "RukinStudio",
@@ -61,7 +60,6 @@ namespace Sibers.ProjectManagementSystem.Data.DbContexts.Extensions
                         },
                         new Project
                         {
-                            //Id = 2,
                             Name = "FirstProject",
                             NameOfCustomerCompany = "Some customer company",
                             NameOfContractorCompany = "Microsoft",
@@ -71,7 +69,6 @@ namespace Sibers.ProjectManagementSystem.Data.DbContexts.Extensions
                         },
                         new Project
                         {
-                            //Id = 3,
                             Name = "Second",
                             NameOfCustomerCompany = "Microsoft",
                             NameOfContractorCompany = "Sibers",
@@ -91,7 +88,6 @@ namespace Sibers.ProjectManagementSystem.Data.DbContexts.Extensions
                 id = i + 1;
                 employees[i] = new Employee
                 {
-                    //Id = id,
                     FirstName = $"EmployeeFirstName_{id}",
                     LastName = $"EmployeeLastName_{id}",
                     Patronymic = $"EmployeePatronymic_{id}",
@@ -105,12 +101,10 @@ namespace Sibers.ProjectManagementSystem.Data.DbContexts.Extensions
             {
                     new RoleInProject
                         {
-                            //Id = 1,
                             Name = "Руководитель"
                         },
                         new RoleInProject
                         {
-                            //Id = 1,
                             Name = "Сотрудник"
                         }
             };

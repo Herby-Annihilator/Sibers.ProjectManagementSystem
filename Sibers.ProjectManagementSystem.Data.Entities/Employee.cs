@@ -25,6 +25,6 @@ namespace Sibers.ProjectManagementSystem.Data.Entities
         [MaxLength(512)]
         public string Email { get; set; } = "";
 
-        public ICollection<EmployeeInProject>? EmployeesInProject { get; set; }
+        public ICollection<EmployeeInProject>? EmployeesInProject { get; set; } = new List<EmployeeInProject>();
     }
 }

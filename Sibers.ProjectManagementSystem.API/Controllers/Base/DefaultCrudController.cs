@@ -12,6 +12,7 @@ namespace Sibers.ProjectManagementSystem.API.Controllers.Base
         where TEntity : Entity
     {
         protected IUnitOfWork<TContext> unitOfWork;
+        public virtual bool HasCustomRepository { get; set; } = false;
         public DefaultCrudController(IUnitOfWork<TContext> unitOfWork)
         {
             this.unitOfWork = unitOfWork;
@@ -22,7 +23,7 @@ namespace Sibers.ProjectManagementSystem.API.Controllers.Base
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public virtual async Task<IActionResult> GetById(int id)
         {
-            TEntity result = await unitOfWork.GetRequiredRepository<TEntity>().GetByIdAsync(id);
+            TEntity result = await unitOfWork.GetRequiredRepository<TEntity>(HasCustomRepository).GetByIdAsync(id);
             if (result == null)
                 return NotFound(id);
             return Ok(result);
@@ -33,7 +34,7 @@ namespace Sibers.ProjectManagementSystem.API.Controllers.Base
         [ProducesResponseType(StatusCodes.Status201Created)]
         public virtual async Task<IActionResult> Create(TEntity entity)
         {
-            var result = await unitOfWork.GetRequiredRepository<TEntity>().AddEntityAsync(entity);
+            var result = await unitOfWork.GetRequiredRepository<TEntity>(HasCustomRepository).AddEntityAsync(entity);
             if (result == null)
                 return NotFound(entity);
             else
@@ -45,7 +46,7 @@ namespace Sibers.ProjectManagementSystem.API.Controllers.Base
         [ProducesResponseType(StatusCodes.Status202Accepted)]
         public virtual async Task<IActionResult> Update(TEntity entity)
         {
-            var result = await unitOfWork.GetRequiredRepository<TEntity>().UpdateEntityAsync(entity);
+            var result = await unitOfWork.GetRequiredRepository<TEntity>(HasCustomRepository).UpdateEntityAsync(entity);
             if (result == null)
                 return NotFound(entity);
             else
@@ -57,7 +58,7 @@ namespace Sibers.ProjectManagementSystem.API.Controllers.Base
         [ProducesResponseType(StatusCodes.Status200OK)]
         public virtual async Task<ActionResult> Delete(TEntity entity)
         {
-            var result = await unitOfWork.GetRequiredRepository<TEntity>().DeleteEntityAsync(entity);
+            var result = await unitOfWork.GetRequiredRepository<TEntity>(HasCustomRepository).DeleteEntityAsync(entity);
             if (result == null)
                 return NotFound(entity);
             else
@@ -66,6 +67,6 @@ namespace Sibers.ProjectManagementSystem.API.Controllers.Base
 
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public virtual async Task<IActionResult> GetAll() => Ok(await unitOfWork.GetRequiredRepository<TEntity>().GetAllAsync());
+        public virtual async Task<IActionResult> GetAll() => Ok(await unitOfWork.GetRequiredRepository<TEntity>(HasCustomRepository).GetAllAsync());
     }
 }

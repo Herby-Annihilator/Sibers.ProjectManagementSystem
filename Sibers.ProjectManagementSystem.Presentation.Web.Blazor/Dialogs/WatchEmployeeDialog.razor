@@ -1,4 +1,9 @@
 ﻿@using Sibers.ProjectManagementSystem.Data.Entities
+@using Sibers.ProjectManagementSystem.Data.Repositories.Base
+
+@inject ICrudRepository<Project> ProjectRepository
+@inject ICrudRepository<RoleInProject> RoleInProjectRepository
+
 <MudDialog>
     <DialogContent>
         <MudContainer>
@@ -59,9 +64,16 @@
     [CascadingParameter]
     MudDialogInstance MudDialog { get; set; }
 
-    protected override Task OnInitializedAsync()
+    protected override async Task OnInitializedAsync()
     {
-        return base.OnInitializedAsync();
+        if (EmployeeToWatch.EmployeesInProject != null)
+        {
+            foreach (var item in EmployeeToWatch.EmployeesInProject)
+            {
+                item.Project = await ProjectRepository.GetByIdAsync(item.ProjectId);
+                item.RoleInProject = await RoleInProjectRepository.GetByIdAsync(item.RoleInProjectId);
+            }
+        }    
     }
     /// <summary>
     /// Employee to watch
