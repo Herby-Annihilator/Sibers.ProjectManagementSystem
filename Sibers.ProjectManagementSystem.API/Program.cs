@@ -2,12 +2,14 @@ using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.EntityFrameworkCore;
 using Sibers.ProjectManagementSystem.Data.DbContexts;
 using Sibers.ProjectManagementSystem.Data.DbContexts.Extensions;
+using Sibers.ProjectManagementSystem.Data.DTOs;
 using Sibers.ProjectManagementSystem.Data.Entities;
 using Sibers.ProjectManagementSystem.Data.Repositories;
 using Sibers.ProjectManagementSystem.Data.Repositories.Base;
 using Sibers.ProjectManagementSystem.Data.Repositories.Defaults;
 using Sibers.ProjectManagementSystem.Data.UnitsOfWork.Base;
 using Sibers.ProjectManagementSystem.Data.UnitsOfWork.Defaults;
+using Sibers.ProjectManagementSystem.Services.Mappers.Base;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -23,10 +25,17 @@ builder.Services.AddDbContext<ProjectManagementSystemDbContext>(optionsBuilder =
         sql => sql.MigrationsAssembly(migrationAssembly));
 });
 
-builder.Services.AddScoped<ICrudRepository<Employee>, EmployeeRepository>();
-builder.Services.AddScoped<ICrudRepository<Project>, ProjectRepository>();
-builder.Services.AddScoped<ICrudRepository<RoleInProject>, RoleInProjectRepository>();
+
+//builder.Services.AddScoped<ICrudRepository<Employee>, EmployeeRepository>();
+//builder.Services.AddScoped<ICrudRepository<Project>, ProjectRepository>();
+//builder.Services.AddScoped<ICrudRepository<RoleInProject>, RoleInProjectRepository>();
 builder.Services.AddScoped<IUnitOfWork<ProjectManagementSystemDbContext>, UnitOfWork<ProjectManagementSystemDbContext>>();
+
+builder.Services.AddSingleton<IMapper<Employee, EmployeeDto>>();
+builder.Services.AddSingleton<IMapper<Project, ProjectDto>>();
+builder.Services.AddSingleton<IMapper<RoleInProject, RoleInProjectDto>>();
+
+builder.Services.AddScoped(typeof(ICrudRepository<>), typeof(DefaultCrudRepository<>));
 
 builder.Services.AddControllers().AddJsonOptions(options =>
 {

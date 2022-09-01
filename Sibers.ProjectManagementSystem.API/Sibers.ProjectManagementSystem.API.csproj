@@ -20,6 +20,7 @@
     <ProjectReference Include="..\Sibers.ProjectManagementSystem.Data.DbContexts\Sibers.ProjectManagementSystem.Data.DbContexts.csproj" />
     <ProjectReference Include="..\Sibers.ProjectManagementSystem.Data.MSSQL\Sibers.ProjectManagementSystem.Data.MSSQL.csproj" />
     <ProjectReference Include="..\Sibers.ProjectManagementSystem.Data.UnitsOfWork\Sibers.ProjectManagementSystem.Data.UnitsOfWork.csproj" />
+    <ProjectReference Include="..\Sibers.ProjectManagementSystem.Services\Sibers.ProjectManagementSystem.Services.csproj" />
   </ItemGroup>
 
 </Project>
