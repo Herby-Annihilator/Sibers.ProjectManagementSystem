@@ -16,6 +16,7 @@
 	<ItemGroup>
 	  <ProjectReference Include="..\Sibers.ProjectManagementSystem.Data.Entities\Sibers.ProjectManagementSystem.Data.Entities.csproj" />
 	  <ProjectReference Include="..\Sibers.ProjectManagementSystem.Data.Repositories\Sibers.ProjectManagementSystem.Data.Repositories.csproj" />
+	  <ProjectReference Include="..\Sibers.ProjectManagementSystem.Services\Sibers.ProjectManagementSystem.Services.csproj" />
 	</ItemGroup>
 	
 	
