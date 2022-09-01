@@ -17,24 +17,24 @@ namespace Sibers.ProjectManagementSystem.Data.Repositories
         {
         }
 
-        public override IEnumerable<RoleInProject> GetAlL() =>
-            entitySet.Include(r => r.EmployeesInProject)
-            .ToArray();
+        //public override IEnumerable<RoleInProject> GetAlL() =>
+        //    entitySet.Include(r => r.EmployeesInProject)
+        //    .ToArray();
 
-        public override async Task<IEnumerable<RoleInProject>> GetAllAsync(CancellationToken cancellationToken = default) =>
-            await entitySet.Include(r => r.EmployeesInProject)
-            .ToArrayAsync()
-            .ConfigureAwait(false);
+        //public override async Task<IEnumerable<RoleInProject>> GetAllAsync(CancellationToken cancellationToken = default) =>
+        //    await entitySet.Include(r => r.EmployeesInProject)
+        //    .ToArrayAsync()
+        //    .ConfigureAwait(false);
 
-        public override RoleInProject GetById(int id) =>
-            entitySet
-            .Include(r => r.EmployeesInProject)
-            .FirstOrDefault(r => r.Id == id);
+        //public override RoleInProject GetById(int id) =>
+        //    entitySet
+        //    .Include(r => r.EmployeesInProject)
+        //    .FirstOrDefault(r => r.Id == id);
 
-        public override async Task<RoleInProject> GetByIdAsync(int id, CancellationToken cancellationToken = default) =>
-            await entitySet
-            .Include(r => r.EmployeesInProject)
-            .FirstOrDefaultAsync(r => r.Id == id, cancellationToken)
-            .ConfigureAwait(false);
+        //public override async Task<RoleInProject> GetByIdAsync(int id, CancellationToken cancellationToken = default) =>
+        //    await entitySet
+        //    .Include(r => r.EmployeesInProject)
+        //    .FirstOrDefaultAsync(r => r.Id == id, cancellationToken)
+        //    .ConfigureAwait(false);
     }
 }

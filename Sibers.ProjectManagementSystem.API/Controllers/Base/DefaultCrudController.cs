@@ -7,7 +7,7 @@ namespace Sibers.ProjectManagementSystem.API.Controllers.Base
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class DefaultCrudController<TContext, TEntity> : ControllerBase
+    public class DefaultCrudController<TContext, TEntity, TDto> : ControllerBase
         where TContext : DbContext
         where TEntity : Entity
     {

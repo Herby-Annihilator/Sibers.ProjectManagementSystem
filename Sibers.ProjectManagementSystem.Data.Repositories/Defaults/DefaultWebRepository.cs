@@ -23,7 +23,8 @@ namespace Sibers.ProjectManagementSystem.Data.Repositories.Defaults
             {
                 ReferenceHandler = ReferenceHandler.Preserve,
                 //PropertyNameCaseInsensitive = true,
-                PropertyNamingPolicy = null
+                PropertyNamingPolicy = null,
+                WriteIndented = true,
             };
             
         }
