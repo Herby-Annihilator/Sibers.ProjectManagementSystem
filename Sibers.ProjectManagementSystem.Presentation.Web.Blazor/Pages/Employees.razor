@@ -1,13 +1,15 @@
 ﻿@page "/employees"
+@using Sibers.ProjectManagementSystem.Data.DTOs
 @using Sibers.ProjectManagementSystem.Data.Entities
 @using Sibers.ProjectManagementSystem.Data.Repositories.Base
 @using Sibers.ProjectManagementSystem.Presentation.Web.Blazor.Dialogs
 @using Sibers.ProjectManagementSystem.Presentation.Web.Blazor.Infrastructure.Commands
 @using Sibers.ProjectManagementSystem.Presentation.Web.Blazor.Infrastructure.Commands.Base
+@using Sibers.ProjectManagementSystem.Services.WebApiClients.Base
 
 @inject IDialogService DialogService
 @inject ISnackbar Snackbar
-@inject ICrudRepository<Employee> EmployeeRepository
+@inject IClient<EmployeeDto> EmployeeWebService
 
 <PageTitle>Все сотрудники компании</PageTitle>
 <MudFab Style="position:fixed; bottom:10px; right:10px;" Color="Color.Success"
@@ -23,27 +25,27 @@ else
     <MudTable Style="height:stretch;" Items="_employeesList" FixedHeader="true" FixedFooter="true" Hover="true" SortLabel="Sort by">
     <HeaderContent>
         <MudTh>
-            <MudTableSortLabel SortBy="new Func<Employee, object>(e => e.Id)">
+            <MudTableSortLabel SortBy="new Func<EmployeeDto, object>(e => e.Id)">
                 Id
             </MudTableSortLabel>
         </MudTh>
         <MudTh>
-            <MudTableSortLabel SortBy="new Func<Employee, object>(e => e.FirstName)">
+            <MudTableSortLabel SortBy="new Func<EmployeeDto, object>(e => e.FirstName)">
                 Фамилия
             </MudTableSortLabel>
         </MudTh>
         <MudTh>
-            <MudTableSortLabel SortBy="new Func<Employee, object>(e => e.LastName)">
+            <MudTableSortLabel SortBy="new Func<EmployeeDto, object>(e => e.LastName)">
                 Имя
             </MudTableSortLabel>
         </MudTh>
         <MudTh>
-            <MudTableSortLabel SortBy="new Func<Employee, object>(e => e.Patronymic)">
+            <MudTableSortLabel SortBy="new Func<EmployeeDto, object>(e => e.Patronymic)">
                 Отчество
             </MudTableSortLabel>
         </MudTh>
         <MudTh>
-            <MudTableSortLabel SortBy="new Func<Employee, object>(e => e.Email)">
+            <MudTableSortLabel SortBy="new Func<EmployeeDto, object>(e => e.Email)">
                 Email
             </MudTableSortLabel>
         </MudTh>
@@ -73,11 +75,11 @@ else
 }
 
 @code {
-    private ICollection<Employee> _employeesList;
+    private ICollection<EmployeeDto> _employeesList;
 
     protected override async Task OnInitializedAsync()
     {
-        _employeesList = (ICollection<Employee>)await EmployeeRepository.GetAllAsync(); 
+        _employeesList = await EmployeeWebService.GetAllAsync(); 
     }
 
     private void OnEmployeeEdit()
@@ -92,7 +94,7 @@ else
         var dialog = DialogService.Show<EmployeeManagementDialog>("Управление сотрудником", options);
     }
 
-    private void OnEmployeeWatch(Employee employee)
+    private void OnEmployeeWatch(EmployeeDto employee)
     {
         ICommand watchCommand = new ShowWatchEmployeeDialogCommand(DialogService);
         watchCommand.Execute(employee);
@@ -115,7 +117,7 @@ else
             if (result.Data is bool ok)
             {
                 _employeesList.Clear();
-                ICollection<Employee> employees = (ICollection<Employee>)await EmployeeRepository.GetAllAsync();
+                ICollection<EmployeeDto> employees = await EmployeeWebService.GetAllAsync();
                 foreach (var item in employees)
                 {
                     _employeesList.Add(item);
@@ -125,7 +127,7 @@ else
         }
     }
 
-    private async Task OnEmployeeDelete(Employee employee)
+    private async Task OnEmployeeDelete(EmployeeDto employee)
     {
         bool? result = await DialogService.ShowMessageBox(
             title: $"Удаление сотрудника '{employee.FirstName} {employee.LastName} {employee.Patronymic}'",
@@ -136,7 +138,7 @@ else
         if (result != null && result == true)
         {
             _employeesList.Remove(employee);
-            var entity = await EmployeeRepository.DeleteEntityAsync(employee.Id);
+            var entity = await EmployeeWebService.DeleteEntityAsync(employee);
             if (entity == default)
             {
                 Snackbar.Add("Сотрудник не был удален", Severity.Error);

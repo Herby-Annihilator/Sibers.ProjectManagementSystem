@@ -11,7 +11,7 @@ namespace Sibers.ProjectManagementSystem.Data.UnitsOfWork.Base
 {
     public interface IUnitOfWork : IDisposable
     {
-        ICrudRepository<T> GetRequiredRepository<T>(bool hasCustomRepository = false) where T : Entity;
+        ICrudRepository<T> GetRequiredRepository<T>(bool hasCustomRepository = false) where T : class;
     }
 
     public interface IUnitOfWork<TContext> : IUnitOfWork, IDisposable where TContext : DbContext

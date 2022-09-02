@@ -8,7 +8,9 @@ using System.Threading.Tasks;
 
 namespace Sibers.ProjectManagementSystem.Services.Mappers.Base
 {
-    public interface IMapper<TBaseEntity, TEntity>
+    public interface IMapper<TBaseEntity, TEntity> 
+        where TBaseEntity : class 
+        where TEntity : class
     {
         TBaseEntity Map(TEntity entity);
 

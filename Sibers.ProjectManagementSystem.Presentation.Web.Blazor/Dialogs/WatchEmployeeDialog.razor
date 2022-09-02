@@ -1,8 +1,10 @@
-﻿@using Sibers.ProjectManagementSystem.Data.Entities
+﻿@using Sibers.ProjectManagementSystem.Data.DTOs
+@using Sibers.ProjectManagementSystem.Data.Entities
 @using Sibers.ProjectManagementSystem.Data.Repositories.Base
+@using Sibers.ProjectManagementSystem.Services.WebApiClients.Base
 
-@inject ICrudRepository<Project> ProjectRepository
-@inject ICrudRepository<RoleInProject> RoleInProjectRepository
+@inject IClient<Project> ProjectWebService
+@inject IClient<RoleInProject> RoleInProjectWebService
 
 <MudDialog>
     <DialogContent>
@@ -28,13 +30,13 @@
                 <MudText Typo="Typo.h5" GutterBottom="true" Class="mt-5">
                     Задействован на проектах
                 </MudText>
-                @if (EmployeeToWatch.EmployeesInProject == null)
+                @if (EmployeeToWatch.ProjectRoleDtos == null)
                 {
                     <MudProgressCircular Indeterminate="true"></MudProgressCircular>
                 }
                 else
                 {
-                    <MudTable Items="EmployeeToWatch.EmployeesInProject" Hover="true">
+                    <MudTable Items="EmployeeToWatch.ProjectRoleDtos" Hover="true">
                         <HeaderContent>
                             <MudTh>
                                 Название проекта
@@ -44,8 +46,8 @@
                             </MudTh>
                         </HeaderContent>
                         <RowTemplate Context="ep">
-                            <MudTd DataLabel="Название проекта">@ep.Project?.Name</MudTd>
-                            <MudTd DataLabel="Роль на проекте">@ep.RoleInProject?.Name</MudTd>
+                            <MudTd DataLabel="Название проекта">@ep.ProjectName</MudTd>
+                            <MudTd DataLabel="Роль на проекте">@ep.RoleName</MudTd>
                         </RowTemplate>
                         <PagerContent>
                             <MudTablePager PageSizeOptions="new int[] { 5, 10, 15}"/>
@@ -64,22 +66,11 @@
     [CascadingParameter]
     MudDialogInstance MudDialog { get; set; }
 
-    protected override async Task OnInitializedAsync()
-    {
-        if (EmployeeToWatch.EmployeesInProject != null)
-        {
-            foreach (var item in EmployeeToWatch.EmployeesInProject)
-            {
-                item.Project = await ProjectRepository.GetByIdAsync(item.ProjectId);
-                item.RoleInProject = await RoleInProjectRepository.GetByIdAsync(item.RoleInProjectId);
-            }
-        }    
-    }
     /// <summary>
     /// Employee to watch
     /// </summary>
     [Parameter]
-    public Employee EmployeeToWatch { get; set; }
+    public EmployeeDto EmployeeToWatch { get; set; }
 
     private void Cancel() => MudDialog.Cancel();
 }

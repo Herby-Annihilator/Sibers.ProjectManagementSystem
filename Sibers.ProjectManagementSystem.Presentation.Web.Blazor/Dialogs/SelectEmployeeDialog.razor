@@ -1,4 +1,5 @@
-﻿@using Sibers.ProjectManagementSystem.Data.Entities
+﻿@using Sibers.ProjectManagementSystem.Data.DTOs
+@using Sibers.ProjectManagementSystem.Data.Entities
 <MudDialog>
     <DialogContent>
         <MudContainer>
@@ -60,13 +61,13 @@
 @code {
     [CascadingParameter]
     private MudDialogInstance MudDialog { get; set; }
-    private IEnumerable<Employee> _employeesList;
+    private IEnumerable<EmployeeDto> _employeesList;
 
     protected override async Task OnInitializedAsync()
     {
         await GetEmployees();
     }
-    private HashSet<Employee> _selectedEmployees = new HashSet<Employee>();
+    private HashSet<EmployeeDto> _selectedEmployees = new HashSet<EmployeeDto>();
 
     private Task GetEmployees()
     {
@@ -74,11 +75,11 @@
         {
             int employeesCount = 33;
             int id;
-            Employee[] employees = new Employee[employeesCount];
+            EmployeeDto[] employees = new EmployeeDto[employeesCount];
             for (int i = 0; i < employeesCount; i++)
             {
                 id = i + 1;
-                employees[i] = new Employee
+                employees[i] = new EmployeeDto
                 {
                     Id = id,
                     FirstName = $"EmployeeFirstName_{id}",

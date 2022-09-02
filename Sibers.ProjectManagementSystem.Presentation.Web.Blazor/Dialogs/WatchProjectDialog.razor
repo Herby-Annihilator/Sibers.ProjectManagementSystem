@@ -1,9 +1,11 @@
-﻿@using Sibers.ProjectManagementSystem.Data.Entities
+﻿@using Sibers.ProjectManagementSystem.Data.DTOs
+@using Sibers.ProjectManagementSystem.Data.Entities
 @using Sibers.ProjectManagementSystem.Data.Repositories.Base
+@using Sibers.ProjectManagementSystem.Services.WebApiClients.Base
 @inject IDialogService DialogService
-@inject ICrudRepository<Project> ProjectRepository
-@inject ICrudRepository<Employee> EmployeeRepository
-@inject ICrudRepository<RoleInProject> RoleInProjectRepository
+@inject IClient<ProjectDto> ProjectWebService
+@inject IClient<EmployeeDto> EmployeeWebService
+@inject IClient<RoleInProjectDto> RoleInProjectWebService
 
 <MudDialog DisableSidePadding="true">
     <DialogContent>
@@ -54,27 +56,27 @@
                     <MudTable Items="_employees" FixedHeader="true" FixedFooter="true" Hover="true" SortLabel="Sort by">
                         <HeaderContent>
                             <MudTh>
-                                <MudTableSortLabel SortBy="new Func<Employee, object>(e => e.Id)">
+                                <MudTableSortLabel SortBy="new Func<EmployeeDto, object>(e => e.Id)">
                                     Id
                                 </MudTableSortLabel>
                             </MudTh>
                             <MudTh>
-                                <MudTableSortLabel SortBy="new Func<Employee, object>(e => e.FirstName)">
+                                <MudTableSortLabel SortBy="new Func<EmployeeDto, object>(e => e.FirstName)">
                                     Фамилия
                                 </MudTableSortLabel>
                             </MudTh>
                             <MudTh>
-                                <MudTableSortLabel SortBy="new Func<Employee, object>(e => e.LastName)">
+                                <MudTableSortLabel SortBy="new Func<EmployeeDto, object>(e => e.LastName)">
                                     Имя
                                 </MudTableSortLabel>
                             </MudTh>
                             <MudTh>
-                                <MudTableSortLabel SortBy="new Func<Employee, object>(e => e.Patronymic)">
+                                <MudTableSortLabel SortBy="new Func<EmployeeDto, object>(e => e.Patronymic)">
                                     Отчество
                                 </MudTableSortLabel>
                             </MudTh>
                             <MudTh>
-                                <MudTableSortLabel SortBy="new Func<Employee, object>(e => e.Email)">
+                                <MudTableSortLabel SortBy="new Func<EmployeeDto, object>(e => e.Email)">
                                     Email
                                 </MudTableSortLabel>
                             </MudTh>
@@ -105,18 +107,18 @@
 
     private string DateFormat(DateTime date) => $"{date.Day}.{date.Month}.{date.Year}";
 
-    private ICollection<Employee> _employees = new List<Employee>();
-    private Employee _manager = new Employee();
+    private ICollection<EmployeeDto> _employees = new List<EmployeeDto>();
+    private EmployeeDto _manager = new EmployeeDto();
     private string _managerFullName;
 
     [Parameter]
-    public Project Project { get; set; }
+    public ProjectDto Project { get; set; }
 
     private DateTime? _projectStartDate;
     private DateTime? _projectEndDate;
 
-    private RoleInProject _employeeRole;
-    private RoleInProject _managerRole;
+    private RoleInProjectDto _employeeRole;
+    private RoleInProjectDto _managerRole;
 
     private void OnEmployeeWatch(int employeeId)
     {
@@ -143,18 +145,18 @@
 
     private async Task GetEmployees()
     {
-        IEnumerable<RoleInProject> roles = await RoleInProjectRepository.GetAllAsync();
+        ICollection<RoleInProjectDto> roles = await RoleInProjectWebService.GetAllAsync();
         _employeeRole = roles.First(r => r.Name.ToLower() == "сотрудник");
         _managerRole = roles.First(r => r.Name.ToLower() == "руководитель");
-        Employee employee;
-        if (Project.EmployeesInProject != null)
+        EmployeeDto employee;
+        if (Project.Employees != null)
         {
-            foreach (var item in Project.EmployeesInProject)
+            foreach (var item in Project.Employees)
             {
-                employee = await EmployeeRepository.GetByIdAsync(item.EmployeeId);
+                employee = await EmployeeWebService.GetEntityByIdAsync(item.Id);
                 if (!_employees.Contains(employee))
                 {
-                    if (employee.EmployeesInProject.FirstOrDefault(ep => ep.ProjectId == Project.Id && ep.RoleInProjectId == _managerRole.Id) != null)
+                    if (employee.ProjectRoleDtos.FirstOrDefault(ep => ep.ProjectId == Project.Id && ep.RoleId == _managerRole.Id) != null)
                     {
                         _manager = employee;
                     }

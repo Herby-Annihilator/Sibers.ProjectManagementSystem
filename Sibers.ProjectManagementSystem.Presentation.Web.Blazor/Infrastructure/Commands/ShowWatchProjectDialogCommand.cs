@@ -1,4 +1,5 @@
 ﻿using MudBlazor;
+using Sibers.ProjectManagementSystem.Data.DTOs;
 using Sibers.ProjectManagementSystem.Data.Entities;
 using Sibers.ProjectManagementSystem.Presentation.Web.Blazor.Dialogs;
 using Sibers.ProjectManagementSystem.Presentation.Web.Blazor.Infrastructure.Commands.Base;
@@ -13,10 +14,10 @@ namespace Sibers.ProjectManagementSystem.Presentation.Web.Blazor.Infrastructure.
             this.dialogService = dialogService;
         }
 
-        protected override bool CanExecute(object parameter) => (parameter is Project) && ((parameter as Project) != null);
+        protected override bool CanExecute(object parameter) => (parameter is ProjectDto) && ((parameter as ProjectDto) != null);
         protected override void Execute(object parameter)
         {
-            Project project = parameter as Project;
+            ProjectDto project = parameter as ProjectDto;
             var options = new DialogOptions
             {
                 CloseButton = true,

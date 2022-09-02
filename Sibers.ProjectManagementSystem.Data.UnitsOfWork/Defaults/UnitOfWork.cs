@@ -42,7 +42,7 @@ namespace Sibers.ProjectManagementSystem.Data.UnitsOfWork.Defaults
             GC.SuppressFinalize(this);
         }
 
-        public ICrudRepository<T> GetRequiredRepository<T>(bool hasCustomRepository = false) where T : Entity
+        public ICrudRepository<T> GetRequiredRepository<T>(bool hasCustomRepository = false) where T : class
         {
             if (repositories == null)
             {

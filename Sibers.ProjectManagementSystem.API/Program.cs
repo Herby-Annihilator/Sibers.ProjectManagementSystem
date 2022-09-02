@@ -9,6 +9,7 @@ using Sibers.ProjectManagementSystem.Data.Repositories.Base;
 using Sibers.ProjectManagementSystem.Data.Repositories.Defaults;
 using Sibers.ProjectManagementSystem.Data.UnitsOfWork.Base;
 using Sibers.ProjectManagementSystem.Data.UnitsOfWork.Defaults;
+using Sibers.ProjectManagementSystem.Services.Mappers;
 using Sibers.ProjectManagementSystem.Services.Mappers.Base;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -23,19 +24,20 @@ builder.Services.AddDbContext<ProjectManagementSystemDbContext>(optionsBuilder =
 {
     optionsBuilder.UseSqlServer(configuration.GetConnectionString("MSSQL"),
         sql => sql.MigrationsAssembly(migrationAssembly));
-});
-
-
-//builder.Services.AddScoped<ICrudRepository<Employee>, EmployeeRepository>();
-//builder.Services.AddScoped<ICrudRepository<Project>, ProjectRepository>();
-//builder.Services.AddScoped<ICrudRepository<RoleInProject>, RoleInProjectRepository>();
+}, ServiceLifetime.Singleton);
+builder.Services.AddScoped(typeof(ICrudRepository<>), typeof(DefaultCrudRepository<>));
+//builder.Services.AddScoped<ICrudRepository<Employee>, DefaultCrudRepository<Employee>>();
+//builder.Services.AddScoped<ICrudRepository<Project>, DefaultCrudRepository<Project>>();
+//builder.Services.AddScoped<ICrudRepository<RoleInProject>, DefaultCrudRepository<RoleInProject>>();
 builder.Services.AddScoped<IUnitOfWork<ProjectManagementSystemDbContext>, UnitOfWork<ProjectManagementSystemDbContext>>();
 
-builder.Services.AddSingleton<IMapper<Employee, EmployeeDto>>();
-builder.Services.AddSingleton<IMapper<Project, ProjectDto>>();
-builder.Services.AddSingleton<IMapper<RoleInProject, RoleInProjectDto>>();
 
-builder.Services.AddScoped(typeof(ICrudRepository<>), typeof(DefaultCrudRepository<>));
+
+builder.Services.AddScoped<IMapper<Employee, EmployeeDto>, EmployeeToDtoMapper>();
+builder.Services.AddScoped<IMapper<Project, ProjectDto>, ProjectToDtoMapper>();
+builder.Services.AddScoped<IMapper<RoleInProject, RoleInProjectDto>, RoleInProjectToDtoMapper>();
+
+
 
 builder.Services.AddControllers().AddJsonOptions(options =>
 {

@@ -1,6 +1,8 @@
-﻿@using Sibers.ProjectManagementSystem.Data.Entities
+﻿@using Sibers.ProjectManagementSystem.Data.DTOs
+@using Sibers.ProjectManagementSystem.Data.Entities
 @using Sibers.ProjectManagementSystem.Data.Repositories.Base
-@inject ICrudRepository<RoleInProject> RoleInProjectRepository
+@using Sibers.ProjectManagementSystem.Services.WebApiClients.Base
+@inject IClient<RoleInProjectDto> RoleInProjectWebService
 
 <MudDialog>
     <DialogContent>
@@ -30,20 +32,20 @@
 
     protected override async Task OnInitializedAsync()
     {
-        _rolesInProject = await RoleInProjectRepository.GetAllAsync();
+        _rolesInProject = await RoleInProjectWebService.GetAllAsync();
         if (_rolesInProject == null)
-            _rolesInProject = new List<RoleInProject>();
+            _rolesInProject = new List<RoleInProjectDto>();
     }
 
-    private IEnumerable<RoleInProject> _rolesInProject;
+    private IEnumerable<RoleInProjectDto> _rolesInProject;
 
-    private RoleInProject _selectedRole = new RoleInProject();
+    private RoleInProjectDto _selectedRole = new RoleInProjectDto();
     // This property dialog will get from parameters
     [Parameter]
-    public Project Project { get; set; }
+    public ProjectDto Project { get; set; }
     // This property dialog will get from parameters
     [Parameter]
-    public Employee Employee { get; set; }
+    public EmployeeDto Employee { get; set; }
 
     void Submit()
     {
@@ -51,5 +53,5 @@
     }
     void Cancel() => MudDialog.Cancel();
 
-    Func<RoleInProject, string> converter = role => role.Name;
+    Func<RoleInProjectDto, string> converter = role => role.Name;
 }

@@ -1,12 +1,14 @@
 ﻿@page "/projects"
+@using Sibers.ProjectManagementSystem.Data.DTOs
 @using Sibers.ProjectManagementSystem.Data.Entities
 @using Sibers.ProjectManagementSystem.Data.Repositories.Base
 @using Sibers.ProjectManagementSystem.Presentation.Web.Blazor.Dialogs
 @using Sibers.ProjectManagementSystem.Presentation.Web.Blazor.Infrastructure.Commands
 @using Sibers.ProjectManagementSystem.Presentation.Web.Blazor.Infrastructure.Commands.Base
+@using Sibers.ProjectManagementSystem.Services.WebApiClients.Base
 
 @inject IDialogService DialogService
-@inject ICrudRepository<Project> ProjectsRepository
+@inject IClient<ProjectDto> ProjectsWebService
 
 @if (_projects == null)
 {
@@ -26,37 +28,37 @@ else
         <MudTable Style="height:stretch;" Items="_projects" FixedHeader="true" FixedFooter="true" Hover="true" SortLabel="Sort by">
             <HeaderContent>
                 <MudTh>
-                    <MudTableSortLabel SortBy="new Func<Project, object>(e => e.Id)">
+                    <MudTableSortLabel SortBy="new Func<ProjectDto, object>(e => e.Id)">
                         Id
                     </MudTableSortLabel>
                 </MudTh>
                 <MudTh>
-                    <MudTableSortLabel SortBy="new Func<Project, object>(e => e.Name)">
+                    <MudTableSortLabel SortBy="new Func<ProjectDto, object>(e => e.Name)">
                         Название проекта
                     </MudTableSortLabel>
                 </MudTh>
                 <MudTh>
-                    <MudTableSortLabel SortBy="new Func<Project, object>(e => e.NameOfCustomerCompany)">
+                    <MudTableSortLabel SortBy="new Func<ProjectDto, object>(e => e.NameOfCustomerCompany)">
                         Компания-заказчик
                     </MudTableSortLabel>
                 </MudTh>
                 <MudTh>
-                    <MudTableSortLabel SortBy="new Func<Project, object>(e => e.NameOfContractorCompany)">
+                    <MudTableSortLabel SortBy="new Func<ProjectDto, object>(e => e.NameOfContractorCompany)">
                         Компания-исполнитель
                     </MudTableSortLabel>
                 </MudTh>
                 <MudTh>
-                    <MudTableSortLabel SortBy="new Func<Project, object>(e => e.StartDate)">
+                    <MudTableSortLabel SortBy="new Func<ProjectDto, object>(e => e.StartDate)">
                         Дата начала проекта
                     </MudTableSortLabel>
                 </MudTh>
                 <MudTh>
-                    <MudTableSortLabel SortBy="new Func<Project, object>(e => e.EndDate)">
+                    <MudTableSortLabel SortBy="new Func<ProjectDto, object>(e => e.EndDate)">
                         Дата окончания проекта
                     </MudTableSortLabel>
                 </MudTh>
                 <MudTh>
-                    <MudTableSortLabel SortBy="new Func<Project, object>(e => e.Priority)">
+                    <MudTableSortLabel SortBy="new Func<ProjectDto, object>(e => e.Priority)">
                         Приоритет
                     </MudTableSortLabel>
                 </MudTh>
@@ -90,7 +92,7 @@ else
 
 
 @code {
-    private ICollection<Project> _projects;
+    private ICollection<ProjectDto> _projects;
 
     protected override async Task OnInitializedAsync()
     {
@@ -99,7 +101,7 @@ else
 
     private async Task FillProjects()
     {
-        _projects = (ICollection<Project>)await ProjectsRepository.GetAllAsync();
+        _projects = (ICollection<ProjectDto>)await ProjectsWebService.GetAllAsync();
     }
 
     private async void OnCreateProject()
@@ -116,7 +118,7 @@ else
         var result = await task;
         if (!result.Cancelled)
         {
-            if (result.Data is Project project)
+            if (result.Data is ProjectDto project)
             {
                 _projects.Add(project);
             }
@@ -125,7 +127,7 @@ else
 
     private async Task OnWatchProject(int projectId)
     {
-        Project project = await ProjectsRepository.GetByIdAsync(projectId);
+        ProjectDto project = await ProjectsWebService.GetEntityByIdAsync(projectId);
         ICommand command = new ShowWatchProjectDialogCommand(DialogService);
         command.Execute(project);
     }
@@ -140,7 +142,8 @@ else
         );
         if (result != null && result == true)
         {
-            await ProjectsRepository.DeleteEntityAsync(projectId);
+            ProjectDto dto = _projects.First(d => d.Id == projectId);
+            await ProjectsWebService.DeleteEntityAsync(dto);
             _projects.Remove(_projects.First(p => p.Id == projectId));
         }
     }
@@ -154,7 +157,7 @@ else
                 MaxWidth = MaxWidth.Large,
                 FullWidth = true
             };
-        Project project = ProjectsRepository.GetById(projectId);
+        ProjectDto project = await ProjectsWebService.GetEntityByIdAsync(projectId);
         DialogParameters parameters = new DialogParameters();
         parameters.Add("Project", project);
         var dialog = DialogService.Show<ProjectManagementDialog>("Управление проектом", parameters, options);
@@ -162,7 +165,7 @@ else
         var result = await task;
         if (!result.Cancelled)
         {
-            if (result.Data is Project editedProject)
+            if (result.Data is ProjectDto editedProject)
             {
                 _projects.Remove(_projects.First(p => p.Id == projectId));
                 _projects.Add(editedProject);

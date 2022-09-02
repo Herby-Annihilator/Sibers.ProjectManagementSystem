@@ -1,4 +1,5 @@
-﻿using Sibers.ProjectManagementSystem.Data.DTOs;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Sibers.ProjectManagementSystem.Data.DTOs;
 using Sibers.ProjectManagementSystem.Data.Entities;
 using Sibers.ProjectManagementSystem.Data.Repositories.Base;
 using Sibers.ProjectManagementSystem.Services.Mappers.Base;
@@ -17,10 +18,13 @@ namespace Sibers.ProjectManagementSystem.Services.Mappers
         private RoleInProject _employeeRole;
         private RoleInProject _managerRole;
 
-        public ProjectToDtoMapper(ICrudRepository<Employee> employeeRepository, ICrudRepository<RoleInProject> roleInProjectRepository)
+        public ProjectToDtoMapper(IServiceProvider serviceProvider)
         {
-            _employeeRepository = employeeRepository;
-            _roleInProjectRepository = roleInProjectRepository;
+            using (var scope = serviceProvider.CreateScope())
+            {
+                _employeeRepository = scope.ServiceProvider.GetRequiredService<ICrudRepository<Employee>>();
+                _roleInProjectRepository = scope.ServiceProvider.GetRequiredService<ICrudRepository<RoleInProject>>();
+            }
             IEnumerable<RoleInProject> roles = _roleInProjectRepository.GetAlL();
             _employeeRole = roles.First(r => r.Name.ToLower() == "сотрудник");
             _managerRole = roles.First(r => r.Name.ToLower() == "руководитель");

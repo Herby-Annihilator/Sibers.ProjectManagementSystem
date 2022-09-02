@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace Sibers.ProjectManagementSystem.Data.Repositories.Defaults
 {
-    public class DefaultWebRepository<TEntity> : ICrudRepository<TEntity> where TEntity : Entity
+    public class DefaultWebRepository<TEntity> : ICrudRepository<TEntity> where TEntity : class
     {
         protected HttpClient client;
         protected JsonSerializerOptions options;

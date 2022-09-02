@@ -1,6 +1,8 @@
-﻿@using Sibers.ProjectManagementSystem.Data.Entities
+﻿@using Sibers.ProjectManagementSystem.Data.DTOs
+@using Sibers.ProjectManagementSystem.Data.Entities
 @using Sibers.ProjectManagementSystem.Data.Repositories.Base
-@inject ICrudRepository<Project> ProjectRepository
+@using Sibers.ProjectManagementSystem.Services.WebApiClients.Base
+@inject IClient<ProjectDto> ProjectWebService
 
 <MudDialog>
     <DialogContent>
@@ -23,37 +25,37 @@
                     @bind-SelectedItems="_selectedProjects" @bind-SelectedItem="_selectedProject">
                 <HeaderContent>
                     <MudTh>
-                        <MudTableSortLabel SortBy="new Func<Project, object>(e => e.Id)">
+                        <MudTableSortLabel SortBy="new Func<ProjectDto, object>(e => e.Id)">
                             Id
                         </MudTableSortLabel>
                     </MudTh>
                     <MudTh>
-                        <MudTableSortLabel SortBy="new Func<Project, object>(e => e.Name)">
+                        <MudTableSortLabel SortBy="new Func<ProjectDto, object>(e => e.Name)">
                             Название
                         </MudTableSortLabel>
                     </MudTh>
                     <MudTh>
-                        <MudTableSortLabel SortBy="new Func<Project, object>(e => e.StartDate)">
+                        <MudTableSortLabel SortBy="new Func<ProjectDto, object>(e => e.StartDate)">
                             Дата начала
                         </MudTableSortLabel>
                     </MudTh>
                     <MudTh>
-                        <MudTableSortLabel SortBy="new Func<Project, object>(e => e.EndDate)">
+                        <MudTableSortLabel SortBy="new Func<ProjectDto, object>(e => e.EndDate)">
                             Дата окончания
                         </MudTableSortLabel>
                     </MudTh>
                     <MudTh>
-                        <MudTableSortLabel SortBy="new Func<Project, object>(e => e.NameOfCustomerCompany)">
+                        <MudTableSortLabel SortBy="new Func<ProjectDto, object>(e => e.NameOfCustomerCompany)">
                             Компания-заказчик
                         </MudTableSortLabel>
                     </MudTh>
                     <MudTh>
-                        <MudTableSortLabel SortBy="new Func<Project, object>(e => e.NameOfContractorCompany)">
+                        <MudTableSortLabel SortBy="new Func<ProjectDto, object>(e => e.NameOfContractorCompany)">
                             Компания-исполнитель
                         </MudTableSortLabel>
                     </MudTh>
                     <MudTh>
-                        <MudTableSortLabel SortBy="new Func<Project, object>(e => e.Priority)">
+                        <MudTableSortLabel SortBy="new Func<ProjectDto, object>(e => e.Priority)">
                             Приоритет
                         </MudTableSortLabel>
                     </MudTh>
@@ -83,8 +85,8 @@
 @code {
     [CascadingParameter]
     private MudDialogInstance MudDialog { get; set; }
-    private ICollection<Project> _projectsList;
-    private HashSet<Project> _selectedProjects = new HashSet<Project>();
+    private ICollection<ProjectDto> _projectsList;
+    private HashSet<ProjectDto> _selectedProjects = new HashSet<ProjectDto>();
     /// <summary>
     /// Indicates the need for multiple project selection
     /// </summary>
@@ -94,13 +96,13 @@
     /// Projects that need to be excluded from the final sample
     /// </summary>
     [Parameter]
-    public ICollection<Project> ExcludedProjects { get; set; }
+    public ICollection<ProjectDto> ExcludedProjects { get; set; }
 
-    private Project _selectedProject;
+    private ProjectDto _selectedProject;
 
     protected override async Task OnInitializedAsync()
     {
-        _projectsList = (ICollection<Project>)await ProjectRepository.GetAllAsync();
+        _projectsList = await ProjectWebService.GetAllAsync();
         foreach (var item in ExcludedProjects)
         {
             _projectsList.Remove(item);

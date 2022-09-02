@@ -1,10 +1,12 @@
-﻿@using Sibers.ProjectManagementSystem.Data.Entities
+﻿@using Sibers.ProjectManagementSystem.Data.DTOs
+@using Sibers.ProjectManagementSystem.Data.Entities
 @using Sibers.ProjectManagementSystem.Data.Repositories.Base
+@using Sibers.ProjectManagementSystem.Services.WebApiClients.Base
 @inject IDialogService DialogService
 @inject ISnackbar Snackbar
-@inject ICrudRepository<Project> ProjectRepository
-@inject ICrudRepository<Employee> EmployeeRepository
-@inject ICrudRepository<RoleInProject> RoleInProjectRepository
+@inject IClient<ProjectDto> ProjectWebService
+@inject IClient<EmployeeDto> EmployeeWebService
+@inject IClient<RoleInProjectDto> RoleInProjectWebService
 
 <MudDialog>
     <DialogContent>
@@ -32,13 +34,13 @@
                         <MudButton Variant="Variant.Filled" Color="Color.Success" Class="mt-3 mb-3" @onclick="OnProjectSelecting">
                             Добавить на проект
                         </MudButton>
-                        @if (_employee.EmployeesInProject == null)
+                        @if (_employee.ProjectRoleDtos == null)
                         {
                             <MudProgressCircular Indeterminate="true"></MudProgressCircular>
                         }
                         else
                         {
-                            <MudTable Items="_employee.EmployeesInProject" Hover="true">
+                            <MudTable Items="_employee.ProjectRoleDtos" Hover="true">
                                 <HeaderContent>
                                     <MudTh>
                                         Название проекта
@@ -51,13 +53,13 @@
                                     </MudTh>
                                 </HeaderContent>
                                 <RowTemplate Context="ep">
-                                    <MudTd DataLabel="Название проекта">@ep.Project?.Name</MudTd>
-                                    <MudTd DataLabel="Роль на проекте">@ep.RoleInProject?.Name</MudTd>
+                                    <MudTd DataLabel="Название проекта">@ep.ProjectName</MudTd>
+                                    <MudTd DataLabel="Роль на проекте">@ep.RoleName</MudTd>
                                     <MudTd DataLabel="Действие">
-                                        <MudButton Color="Color.Tertiary" Variant="Variant.Filled" @onclick="@(() => OnChangeEmployeesRole(ep.Project))">
+                                        <MudButton Color="Color.Tertiary" Variant="Variant.Filled" @onclick="@(() => OnChangeEmployeesRole(@ep.ProjectId))">
                                             Изменить роль
                                         </MudButton>
-                                        <MudButton Color="Color.Error" Variant="Variant.Filled" @onclick="@(() => OnRemovingEmployeeFromProject(@ep.Project.Id))">
+                                        <MudButton Color="Color.Error" Variant="Variant.Filled" @onclick="@(() => OnRemovingEmployeeFromProject(@ep.ProjectId))">
                                             Снять с проекта
                                         </MudButton>
                                     </MudTd>
@@ -81,17 +83,27 @@
     [CascadingParameter]
     MudDialogInstance MudDialog { get; set; }
 
-    private RoleInProject _employeeRole;
-    private RoleInProject _managerRole;
+    private RoleInProjectDto _employeeRole;
+    private RoleInProjectDto _managerRole;
+
+    private EmployeeDto _employee = new EmployeeDto
+        {
+            FirstName = "",
+            LastName = "",
+            Patronymic = "",
+            Email = "",
+            Id = 0,
+            ProjectRoleDtos = new List<ProjectRoleDto>()
+        };
 
     protected override async Task OnInitializedAsync()
     {
-        IEnumerable<RoleInProject> roles = await RoleInProjectRepository.GetAllAsync();
+        IEnumerable<RoleInProjectDto> roles = await RoleInProjectWebService.GetAllAsync();
         _employeeRole = roles.FirstOrDefault(r => r.Name.ToLower() == "сотрудник");
         _managerRole = roles.FirstOrDefault(r => r.Name.ToLower() == "руководитель");
     }
 
-    private async Task OnChangeEmployeesRole(Project project)
+    private async Task OnChangeEmployeesRole(int projectId)
     {
         DialogOptions options = new DialogOptions
             {
@@ -101,6 +113,7 @@
                 FullWidth = true
             };
         DialogParameters parameters = new DialogParameters();
+        ProjectDto project = await ProjectWebService.GetEntityByIdAsync(projectId);
         parameters.Add("Project", project);
         parameters.Add("Employee", _employee);
         var dialog = DialogService.Show<ChangeEmployeesRoleDialog>("Изменение роли сотрудника", parameters, options);
@@ -108,14 +121,15 @@
         var result = await task;
         if (!result.Cancelled)
         {
-            if (result.Data is RoleInProject role)
+            if (result.Data is RoleInProjectDto role)
             {
-                _employee.EmployeesInProject.Remove(_employee.EmployeesInProject.First(ep => ep.Employee.Id == _employee.Id && ep.Project.Id == project.Id));
-                _employee.EmployeesInProject.Add(new EmployeeInProject
+                _employee.ProjectRoleDtos.Remove(_employee.ProjectRoleDtos.First(ep => ep.ProjectId == project.Id));
+                _employee.ProjectRoleDtos.Add(new ProjectRoleDto
                 {
-                    Project = project,
-                    Employee = _employee,
-                    RoleInProject = role
+                    ProjectId = project.Id,
+                    ProjectName = project.Name,
+                    RoleId = role.Id,
+                    RoleName = role.Name
                 });
                 Snackbar.Add("Роль изменена", Severity.Success);
             }
@@ -133,28 +147,29 @@
             };
         DialogParameters parameters = new DialogParameters();
         parameters.Add("Multiselection", true);
-        parameters.Add("ExcludedProjects", GetExludedProjects());
+        parameters.Add("ExcludedProjects", await GetExludedProjects());
         var dialog = DialogService.Show<SelectProjectDialog>("Выбор проектов для сотрудника", parameters, options);
         using var task = dialog.Result;
         var result = await task;
         if (!result.Cancelled)
         {
-            if (result.Data is ICollection<Project> projects)
+            if (result.Data is ICollection<ProjectDto> projects)
             {
-                foreach (var item in projects)
+                foreach (var dto in projects)
                 {
-                    _employee.EmployeesInProject.Add(new EmployeeInProject
+                    _employee.ProjectRoleDtos.Add(new ProjectRoleDto
                     {
-                        Employee = _employee,
-                        Project = item,
-                        RoleInProject = _employeeRole
+                        ProjectId = dto.Id,
+                        ProjectName = dto.Name,
+                        RoleId = dto.Manager == null ? _employeeRole.Id : _employeeRole.Id,
+                        RoleName = dto.Manager == null ? _employeeRole.Name : _managerRole.Name
                     });
                 }
                 Snackbar.Add("Для сотрудника были выбраны проекты", Severity.Success);
             }
             else
             {
-                Snackbar.Add("result.Data is not an ICollection<Project>", Severity.Error);
+                Snackbar.Add("result.Data is not an ICollection<ProjectDto>", Severity.Error);
             }
         }
         else
@@ -163,12 +178,12 @@
         }
     }
 
-    private List<Project> GetExludedProjects()
+    private async Task<List<ProjectDto>> GetExludedProjects()
     {
-        List<Project> projects = new List<Project>();
-        foreach (var item in _employee.EmployeesInProject)
+        List<ProjectDto> projects = new List<ProjectDto>();
+        foreach (var item in _employee.ProjectRoleDtos)
         {
-            projects.Add(item.Project);
+            projects.Add(await ProjectWebService.GetEntityByIdAsync(item.ProjectId));
         }
         return projects;
     }
@@ -184,25 +199,17 @@
         if (result != null && result == true)
         {
             // this employee instance is not in database yet
-            var employeeInProject = _employee.EmployeesInProject.First(ep => ep.Project.Id == projectId);
-            _employee.EmployeesInProject.Remove(employeeInProject);
-            Snackbar.Add($"Сотрудник снят с проекта {employeeInProject.Project?.Name}", Severity.Success);
+            var employeeInProject = _employee.ProjectRoleDtos.First(ep => ep.ProjectId == projectId);
+            _employee.ProjectRoleDtos.Remove(employeeInProject);
+            Snackbar.Add($"Сотрудник снят с проекта {employeeInProject.ProjectName}", Severity.Success);
         }
     }
 
-    private Employee _employee = new Employee
-        {
-            FirstName = "",
-            LastName = "",
-            Patronymic = "",
-            Email = "",
-            Id = 0,
-            EmployeesInProject = new List<EmployeeInProject>()
-        };
+    
 
     async Task Submit()
     {
-        var result = await EmployeeRepository.AddEntityAsync(_employee);
+        var result = await EmployeeWebService.AddEntityAsync(_employee);
         if (result == default)
         {
             Snackbar.Add("Сотрудник не был создан", Severity.Error);
